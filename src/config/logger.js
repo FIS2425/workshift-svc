@@ -28,7 +28,7 @@ const logger = winston.createLogger({
     winston.format.timestamp(),
     winston.format.json()
   ),
-  defaultMeta: { service: 'template-service' },
+  defaultMeta: { service: 'workshift-service' },
   transports: [
     new winston.transports.File({ filename: './logs/error.txt', level: 'error' }),
     new winston.transports.File({
