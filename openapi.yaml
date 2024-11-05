@@ -1,14 +1,218 @@
 openapi: 3.0.0
 info:
-  title: Microservicio Template
+  title: Workshifts Service
   version: 1.0.0
-  description: Template para microservicios
+  description: >
+    Workshift management for a personnel administration application. This microservice handles the scheduling, assignment, and modification of employee work shifts, including last-minute adjustments and cancellations.
 
 servers:
   - url: http://localhost:3001
 
+tags:
+  - name: Workshifts
+    description: Endpoints related to workshifts management
+
 paths:
-  # Aquí irán tus rutas
+  /workshifts:
+    get:
+      tags:
+        - Workshifts
+      summary: Get all workshifts
+      responses:
+        '200':
+          description: Retrieve a list of workshifts
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Workshift'
+        '500':
+          description: Server error
+
+    post:
+      tags:
+        - Workshifts
+      summary: Create a new workshift
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/WorkshiftInput'
+      responses:
+        '201':
+          description: Workshift created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Workshift'
+        '400':
+          description: Validation error
+
+  /workshifts/{id}:
+    get:
+      tags:
+        - Workshifts
+      summary: Get a workshift by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Workshift ID
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Retrieve a workshift
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Workshift'
+        '404':
+          description: Workshift not found
+        '500':
+          description: Server error
+
+    put:
+      tags:
+        - Workshifts
+      summary: Update a workshift by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Workshift ID
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/WorkshiftInput'
+      responses:
+        '200':
+          description: Workshift updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Workshift'
+        '404':
+          description: Workshift not found
+        '400':
+          description: Validation error
+
+    delete:
+      tags:
+        - Workshifts
+      summary: Delete a workshift by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Workshift ID
+          schema:
+            type: string
+      responses:
+        '204':
+          description: Workshift deleted
+        '404':
+          description: Workshift not found
+        '500':
+          description: Server error
+
+  /workshifts/doctor/{doctorId}:
+    get:
+      tags:
+        - Workshifts
+      summary: Get workshifts by doctor ID
+      parameters:
+        - name: doctorId
+          in: path
+          required: true
+          description: Doctor ID
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Lista de workshifts
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Workshift'
+        '500':
+          description: Error del servidor
+
+  /workshifts/availability:
+    get:
+      tags:
+        - Workshifts
+      summary: Check workshift availability
+      parameters:
+        - name: clinicId
+          in: query
+          required: true
+          description: Clinic ID
+          schema:
+            type: string
+        - name: date
+          in: query
+          required: true
+          description: Date to check availability
+          schema:
+            type: string
+            format: date-time
+      responses:
+        '200':
+          description: Workshift availability
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  available:
+                    type: boolean
+        '500':
+          description: Server error
 
 components:
-  # Aquí irán tus componentes reutilizables
+  schemas:
+    Workshift:
+      type: object
+      properties:
+        id:
+          type: string
+          example: "850154d5-6617-4128-b76b-88979b1cbc44"
+        doctorId:
+          type: string
+          example: "850154d5-6617-4128-b76b-88979b1cbc46"
+        clinicId:
+          type: string
+          example: "ea12fd3d-4d3c-4ba2-b871-673c29fb69d3"
+        startDate:
+          type: string
+          format: date-time
+          example: "2024-11-01T09:00:00Z"
+        duration:
+          type: integer
+          example: 120
+
+    WorkshiftInput:
+      type: object
+      properties:
+        doctorId:
+          type: string
+          example: "850154d5-6617-4128-b76b-88979b1cbc46"
+        clinicId:
+          type: string
+          example: "ea12fd3d-4d3c-4ba2-b871-673c29fb69d3"
+        startDate:
+          type: string
+          format: date-time
+          example: "2024-11-01T09:00:00Z"
+        duration:
+          type: integer
+          example: 30
