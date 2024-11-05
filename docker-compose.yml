@@ -23,12 +23,13 @@ services:
     container_name: workshift-svc
     environment:
       - MONGODB_URL=${MONGOURL}
+      - PORT=3011
     depends_on:
       - mongodb-workshift
     networks:
       - backend
     ports:
-      - "3001:3001"
+      - "3011:3011"
     volumes:
       - .:/workshift-svc
 
@@ -38,13 +39,13 @@ services:
     container_name: appointment-svc
     environment:
       - MONGODB_URL=${MONGOURL_APPOINTMENT}
-      - PORT=3000
+      - PORT=3012
     depends_on:
       - mongodb-workshift
     networks:
       - backend
     ports:
-      - "3002:3000"
+      - "3012:3012"
     volumes:
       - .env:/appointment-svc/.env
 

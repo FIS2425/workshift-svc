@@ -6,7 +6,8 @@ info:
     Workshift management for a personnel administration application. This microservice handles the scheduling, assignment, and modification of employee work shifts, including last-minute adjustments and cancellations.
 
 servers:
-  - url: http://localhost:3001
+  - url: http://localhost:3011
+    description: Local server for development
 
 tags:
   - name: Workshifts
