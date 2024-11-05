@@ -13,14 +13,14 @@ const router = express.Router();
 
 router.get('/', getAllWorkshifts);
 router.post('/', createWorkshift);
+router.get(
+  '/availability',
+  getAvailability
+);
 router.get('/:id', getWorkshiftById);
 router.get(
   '/doctor/:doctorId',
   getWorkshiftsByDoctorId
-);
-router.get(
-  '/availability',
-  getAvailability
 );
 router.put('/:id', updateWorkshift);
 router.delete('/:id', deleteWorkshift);

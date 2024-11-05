@@ -71,6 +71,7 @@ export const deleteWorkshift = async (req, res) => {
 export const getAvailability = async (req, res) => {
   const { clinicId, date } = req.query;
   try {
+    logger.debug(`Checking availability for clinic ${clinicId} at ${date}`);
     const startDate = new Date(date);
     const endDate = new Date(startDate);
     endDate.setMinutes(endDate.getMinutes() + 30);// Suponiendo que la duración es de 30 minutos
@@ -82,9 +83,16 @@ export const getAvailability = async (req, res) => {
         $lt: endDate,
       },
     });
-    if (workshifts.length === 0) {
+    
+    //TODO: Comprobar la especialidad del doctor además de la disponibilidad
+
+    if (workshifts.length === 1) {
       logger.debug(`Workshift available for clinic ${clinicId} at ${date}`);
-      return res.status(200).json({ available: true });
+      return res.status(200).json({ available: true, doctorId: workshifts[0].doctorId });
+    } else if(workshifts.length > 1){
+      logger.debug(`Workshift available for clinic ${clinicId} at ${date}`);
+      const doctorIds = workshifts.map(workshift => workshift.doctorId);
+      return res.status(200).json({ available: true, doctorIds: doctorIds });
     } else {
       logger.debug(`Workshift not available for clinic ${clinicId} at ${date}`);
       return res.status(200).json({ available: false });
