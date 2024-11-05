@@ -32,6 +32,22 @@ services:
     volumes:
       - .:/workshift-svc
 
+  appointment-svc:
+    restart: unless-stopped
+    image: cloudmedix/appointment
+    container_name: appointment-svc
+    environment:
+      - MONGODB_URL=${MONGOURL_APPOINTMENT}
+      - PORT=3000
+    depends_on:
+      - mongodb-workshift
+    networks:
+      - backend
+    ports:
+      - "3002:3000"
+    volumes:
+      - .env:/appointment-svc/.env
+
 volumes:
   mongo-data:
 
