@@ -83,7 +83,11 @@ export const getAvailability = async (req, res) => {
         $lt: endDate,
       },
     });
+
+    //TODO: Cache de apointments
     
+
+
     //TODO: Comprobar la especialidad del doctor además de la disponibilidad
 
     if (workshifts.length === 1) {
