@@ -1,10 +1,10 @@
 version: "3.8"
 
 services:
-  mongodb:
+  mongodb-workshift:
     restart: unless-stopped
     image: mongo:latest
-    container_name: mongodb
+    container_name: mongodb-workshift
     environment:
       - MONGO_INITDB_ROOT_USERNAME=${MONGOADMIN}
       - MONGO_INITDB_ROOT_PASSWORD=${MONGOPASS}
@@ -15,22 +15,22 @@ services:
     volumes:
       - mongo-data:/data/db
 
-  template:
+  workshift-svc:
     restart: unless-stopped
     build:
       context: .
       dockerfile: Dockerfile
-    container_name: template
+    container_name: workshift-svc
     environment:
       - MONGODB_URL=${MONGOURL}
     depends_on:
-      - mongodb
+      - mongodb-workshift
     networks:
       - backend
     ports:
       - "3001:3001"
     volumes:
-      - .:/template
+      - .:/workshift-svc
 
 volumes:
   mongo-data:

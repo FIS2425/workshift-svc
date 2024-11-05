@@ -1,5 +1,5 @@
 {
-  "name": "template",
+  "name": "workshift",
   "version": "1.0.0",
   "description": "Template repository for starting a microservice",
   "engines": {
@@ -51,6 +51,7 @@
     "express": "4.21.1",
     "mongoose": "8.8.0",
     "swagger-ui-express": "5.0.1",
+    "uuid": "11.0.2",
     "winston": "3.16.0",
     "yamljs": "0.3.0"
   }
