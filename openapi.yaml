@@ -73,13 +73,13 @@ paths:
                         type: integer
                         description: "Duration of each work shift in minutes"
                         example: 480
-                      weekStartDate:
+                      periodStartDate:
                         type: string
                         format: date-time
                         description: "Start date of the week, must be a Monday"
-                      weekEndDate:
+                      periodEndDate:
                         type: string
-                        format: date-time
+                        format: date
                         description: "End date of the week, must be a Sunday within the same week as weekStartDate"
                     required:
                       - doctorId
