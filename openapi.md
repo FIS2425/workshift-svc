@@ -166,9 +166,9 @@ Create a new workshift for a week
   // Duration of each work shift in minutes
   duration: integer
   // Start date of the week, must be a Monday
-  weekStartDate: string
+  periodStartDate?: string
   // End date of the week, must be a Sunday within the same week as weekStartDate
-  weekEndDate: string
+  periodEndDate?: string
 }
 ```
 
