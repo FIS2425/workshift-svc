@@ -1,4 +1,5 @@
 import Workshift from '../schemas/Workshift.js';
+import { getWeek } from '../utils/dateutils.js';
 import logger from '../config/logger.js';
 
 export const createWorkshift = async (req, res) => {
@@ -21,14 +22,25 @@ export const createWorkshift = async (req, res) => {
 
 export const createWorkshiftsBulk = async (req, res) => {
   try {
-    const { doctorId, clinicId, duration, weekStartDate, weekEndDate } = req.body;
+    const { doctorId, clinicId, duration, periodStartDate, periodEndDate } = req.body;
 
-    // Parsear las fechas para evitar mutaciones no intencionadas
-    const startDate = new Date(weekStartDate);
-    const endDate = new Date(weekEndDate);
+    const startDate = new Date(periodStartDate);
+    let endDate = new Date(periodEndDate);
 
-    if (startDate.getDay() !== 1 || endDate.getDay() !== 0 || (endDate - startDate) / (1000 * 60 * 60 * 24) !== 6) {
-      return res.status(400).json({ message: 'weekStartDate must be a Monday and weekEndDate a Sunday of the same week' });
+    endDate.setHours(startDate.getHours());
+    endDate.setMinutes(startDate.getMinutes());
+    endDate.setSeconds(startDate.getSeconds());
+    endDate.setMilliseconds(startDate.getMilliseconds());
+
+    if (endDate < startDate && endDate.getDate() !== startDate.getDate()) {
+      return res.status(400).json({ message: 'The work period must be at least one day long' });
+    }
+
+    const startWeek = await getWeek(startDate);
+    const endWeek = await getWeek(endDate);
+
+    if (startWeek !== endWeek) {
+      return res.status(400).json({ message: 'The work period must be within the same week' });
     }
 
     const workshifts = [];
@@ -41,7 +53,7 @@ export const createWorkshiftsBulk = async (req, res) => {
       }));
     }
 
-    // todo validate bussiness rules
+    // todo: validate bussiness rules
 
     await Workshift.insertMany(workshifts);
     logger.info(`Created ${workshifts.length} workshifts for doctor ${doctorId} at clinic ${clinicId}`);
