@@ -51,6 +51,62 @@ paths:
         '400':
           description: Validation error
 
+  /workshifts/week:
+    post:
+      tags:
+        - Workshifts
+      summary: Create a new workshift for a week
+      requestBody:
+              required: true
+              content:
+                application/json:
+                  schema:
+                    type: object
+                    properties:
+                      doctorId:
+                        type: string
+                        description: "Unique identifier for the doctor"
+                      clinicId:
+                        type: string
+                        description: "Unique identifier for the clinic"
+                      duration:
+                        type: integer
+                        description: "Duration of each work shift in minutes"
+                        example: 480
+                      periodStartDate:
+                        type: string
+                        format: date-time
+                        description: "Start date of the week, must be a Monday"
+                      periodEndDate:
+                        type: string
+                        format: date
+                        description: "End date of the week, must be a Sunday within the same week as weekStartDate"
+                    required:
+                      - doctorId
+                      - clinicId
+                      - duration
+                      - weekStartDate
+                      - weekEndDate
+      responses:
+        '201':
+          description: Workshifts created successfully
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Workshift'
+        '400':
+          description: Invalid input or validation error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    description: "Error message explaining the issue"
+                    example: "weekStartDate must be a Monday and weekEndDate a Sunday of the same week"
   /workshifts/{id}:
     get:
       tags:

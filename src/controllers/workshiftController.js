@@ -1,4 +1,5 @@
 import Workshift from '../schemas/Workshift.js';
+import { getWeek } from '../utils/dateutils.js';
 import logger from '../config/logger.js';
 
 export const createWorkshift = async (req, res) => {
@@ -14,6 +15,49 @@ export const createWorkshift = async (req, res) => {
     await workshift.save();
     logger.info(`Workshift ${workshift._id} created`);
     res.status(201).json(workshift);
+  } catch (error) {
+    res.status(400).json({ message: error.message });
+  }
+};
+
+export const createWorkshiftsBulk = async (req, res) => {
+  try {
+    const { doctorId, clinicId, duration, periodStartDate, periodEndDate } = req.body;
+
+    const startDate = new Date(periodStartDate);
+    let endDate = new Date(periodEndDate);
+
+    endDate.setHours(startDate.getHours());
+    endDate.setMinutes(startDate.getMinutes());
+    endDate.setSeconds(startDate.getSeconds());
+    endDate.setMilliseconds(startDate.getMilliseconds());
+
+    if (endDate < startDate && endDate.getDate() !== startDate.getDate()) {
+      return res.status(400).json({ message: 'The work period must be at least one day long' });
+    }
+
+    const startWeek = await getWeek(startDate);
+    const endWeek = await getWeek(endDate);
+
+    if (startWeek !== endWeek) {
+      return res.status(400).json({ message: 'The work period must be within the same week' });
+    }
+
+    const workshifts = [];
+    for (let d = new Date(startDate); d <= endDate; d.setDate(d.getDate() + 1)) {
+      workshifts.push(new Workshift({
+        doctorId,
+        clinicId,
+        startDate: new Date(d),
+        duration
+      }));
+    }
+
+    // todo: validate bussiness rules
+
+    await Workshift.insertMany(workshifts);
+    logger.info(`Created ${workshifts.length} workshifts for doctor ${doctorId} at clinic ${clinicId}`);
+    res.status(201).json(workshifts);
   } catch (error) {
     res.status(400).json({ message: error.message });
   }
@@ -85,10 +129,12 @@ export const getAvailability = async (req, res) => {
     });
 
     //TODO: Cache de apointments
-    
+
 
 
     //TODO: Comprobar la especialidad del doctor además de la disponibilidad
+
+    //TODO: Comprobar si el doctor tiene una cita en ese horario
 
     if (workshifts.length === 1) {
       logger.debug(`Workshift available for clinic ${clinicId} at ${date}`);
