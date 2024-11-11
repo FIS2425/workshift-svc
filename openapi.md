@@ -13,6 +13,7 @@ Workshift management for a personnel administration application. This microservi
 | POST | [/workshifts](#postworkshifts) | Create a new workshift |
 | GET | [/workshifts/availability](#getworkshiftsavailability) | Check workshift availability |
 | GET | [/workshifts/doctor/{doctorId}](#getworkshiftsdoctordoctorid) | Get workshifts by doctor ID |
+| POST | [/workshifts/week](#postworkshiftsweek) | Create a new workshift for a week |
 | DELETE | [/workshifts/{id}](#deleteworkshiftsid) | Delete a workshift by ID |
 | GET | [/workshifts/{id}](#getworkshiftsid) | Get a workshift by ID |
 | PUT | [/workshifts/{id}](#putworkshiftsid) | Update a workshift by ID |
@@ -144,6 +145,61 @@ Get workshifts by doctor ID
 ```
 
 - 500 Error del servidor
+
+***
+
+### [POST]/workshifts/week
+
+- Summary  
+Create a new workshift for a week
+
+#### RequestBody
+
+- application/json
+
+```ts
+{
+  // Unique identifier for the doctor
+  doctorId: string
+  // Unique identifier for the clinic
+  clinicId: string
+  // Duration of each work shift in minutes
+  duration: integer
+  // Number of hours worked per day
+  Hours?: integer
+  // Start date of the week, must be a Monday
+  weekStartDate: string
+  // End date of the week, must be a Sunday within the same week as weekStartDate
+  weekEndDate: string
+}
+```
+
+#### Responses
+
+- 201 Workshifts created successfully
+
+`application/json`
+
+```ts
+{
+  id?: string
+  doctorId?: string
+  clinicId?: string
+  startDate?: string
+  duration?: integer
+}[]
+```
+
+- 400 Invalid input or validation error
+
+`application/json`
+
+```ts
+{
+  // Error message explaining the issue
+  message?: string
+}
+```
 
 ***
 
