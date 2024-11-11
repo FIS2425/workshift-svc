@@ -165,8 +165,6 @@ Create a new workshift for a week
   clinicId: string
   // Duration of each work shift in minutes
   duration: integer
-  // Number of hours worked per day
-  Hours?: integer
   // Start date of the week, must be a Monday
   weekStartDate: string
   // End date of the week, must be a Sunday within the same week as weekStartDate
