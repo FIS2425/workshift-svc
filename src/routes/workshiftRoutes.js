@@ -1,6 +1,7 @@
 import express from 'express';
 import {
   createWorkshift,
+  createWorkshiftsBulk,
   getAllWorkshifts,
   getWorkshiftById,
   getWorkshiftsByDoctorId,
@@ -13,6 +14,7 @@ const router = express.Router();
 
 router.get('/', getAllWorkshifts);
 router.post('/', createWorkshift);
+router.post('/week', createWorkshiftsBulk);
 router.get(
   '/availability',
   getAvailability
