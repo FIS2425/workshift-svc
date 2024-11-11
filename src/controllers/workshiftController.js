@@ -19,6 +19,38 @@ export const createWorkshift = async (req, res) => {
   }
 };
 
+export const createWorkshiftsBulk = async (req, res) => {
+  try {
+    const { doctorId, clinicId, duration, weekStartDate, weekEndDate } = req.body;
+
+    // Parsear las fechas para evitar mutaciones no intencionadas
+    const startDate = new Date(weekStartDate);
+    const endDate = new Date(weekEndDate);
+
+    if (startDate.getDay() !== 1 || endDate.getDay() !== 0 || (endDate - startDate) / (1000 * 60 * 60 * 24) !== 6) {
+      return res.status(400).json({ message: 'weekStartDate must be a Monday and weekEndDate a Sunday of the same week' });
+    }
+
+    const workshifts = [];
+    for (let d = new Date(startDate); d <= endDate; d.setDate(d.getDate() + 1)) {
+      workshifts.push(new Workshift({
+        doctorId,
+        clinicId,
+        startDate: new Date(d),
+        duration
+      }));
+    }
+
+    // todo validate bussiness rules
+
+    await Workshift.insertMany(workshifts);
+    logger.info(`Created ${workshifts.length} workshifts for doctor ${doctorId} at clinic ${clinicId}`);
+    res.status(201).json(workshifts);
+  } catch (error) {
+    res.status(400).json({ message: error.message });
+  }
+};
+
 export const getAllWorkshifts = async (req, res) => {
   try {
     const workshifts = await Workshift.find();
@@ -85,10 +117,12 @@ export const getAvailability = async (req, res) => {
     });
 
     //TODO: Cache de apointments
-    
+
 
 
     //TODO: Comprobar la especialidad del doctor además de la disponibilidad
+
+    //TODO: Comprobar si el doctor tiene una cita en ese horario
 
     if (workshifts.length === 1) {
       logger.debug(`Workshift available for clinic ${clinicId} at ${date}`);
