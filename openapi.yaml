@@ -73,10 +73,6 @@ paths:
                         type: integer
                         description: "Duration of each work shift in minutes"
                         example: 480
-                      Hours:
-                        type: integer
-                        description: "Number of hours worked per day"
-                        example: 8
                       weekStartDate:
                         type: string
                         format: date-time
