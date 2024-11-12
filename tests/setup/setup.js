@@ -1,4 +1,4 @@
-import { beforeAll, afterEach, afterAll } from 'vitest';
+import { beforeAll, afterAll } from 'vitest';
 import supertest from 'supertest';
 
 import * as db from './database';
@@ -13,10 +13,6 @@ beforeAll(async () => {
   await db.connect();
   server = app.listen(0);
   request = supertest(server);
-});
-
-afterEach(async () => {
-  await db.clearDatabase();
 });
 
 afterAll(async () => {
