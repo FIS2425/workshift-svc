@@ -107,7 +107,7 @@ describe('WORKSHIFT VALIDATION TEST', () => {
         startDate: new Date('2024-01-15T08:00:00Z'),
         duration: 59,
       });
-      await expect(workshift.save()).rejects.toThrowError("Workshift validation failed: duration: Path `duration` (59) is less than minimum allowed value (60).");
+      await expect(workshift.save()).rejects.toThrowError('Duration must be at least 60 minutes');
     });
     it('should default to 480 minutes if duration is not provided', async () => {
       const workshift = new Workshift({

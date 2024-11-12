@@ -63,14 +63,15 @@ afterAll(async () => {
 describe('WORKSHIFT ENDPOINTS TEST', () => {
   describe('test GET /workshifts', () => {
     it('should return 200 and same number of elements as sample', async () => {
-      const response = await request.get('/workshifts');
+      const response = await request.get('/api/v1/workshifts');
+
       expect(response.status).toBe(200);
       expect(response.body.length).toBe(sampleWorkshifts.length);
     });
   });
   describe('test GET /workshifts/:id', () => {
     it('should return 200 and the correct workshift', async () => {
-      const response = await request.get(`/workshifts/${sampleWorkshifts[0]._id}`);
+      const response = await request.get(`/api/v1/workshifts/${sampleWorkshifts[0]._id}`);
 
       const expectedWorkshift = {
         ...sampleWorkshifts[0].toObject(), // Convert to a plain JS object if it's a Mongoose document
@@ -86,7 +87,7 @@ describe('WORKSHIFT ENDPOINTS TEST', () => {
   });
   describe('test GET /workshifts/doctor/:doctorId', () => {
     it('should return 200 and the correct workshifts', async () => {
-      const response = await request.get(`/workshifts/doctor/${doctor1Id}`);
+      const response = await request.get(`/api/v1/workshifts/doctor/${doctor1Id}`);
 
       const expectedWorkshifts = sampleWorkshifts.filter(workshift => workshift.doctorId === doctor1Id)
         .map(workshift => ({
@@ -103,13 +104,13 @@ describe('WORKSHIFT ENDPOINTS TEST', () => {
   });
   describe('test negative no id GET /workshifts/doctor/:doctorId', () => {
     it('should return 404', async () => {
-      const response = await request.get(`/workshifts/doctor/${uuidv4()}`);
+      const response = await request.get(`/api/v1/workshifts/doctor/${uuidv4()}`);
       expect(response.status).toBe(404);
     })
   });
   describe('test negative no id GET /workshifts/:id', () => {
     it('should return 404', async () => {
-      const response = await request.get(`/workshifts/${uuidv4()}`);
+      const response = await request.get(`/api/v1/workshifts/${uuidv4()}`);
       expect(response.status).toBe(404);
     });
   });
@@ -127,7 +128,7 @@ describe('WORKSHIFT ENDPOINTS TEST', () => {
         duration: 240,
       };
 
-      const response = await request.post('/workshifts').send(newWorkshift);
+      const response = await request.post('/api/v1/workshifts').send(newWorkshift);
       const currentWorkshifts = await Workshift.find();
       expect(response.status).toBe(201);
       expect(currentWorkshifts.length).toBe(previousWorkshifts.length + 1);
@@ -135,7 +136,7 @@ describe('WORKSHIFT ENDPOINTS TEST', () => {
   });
   describe('test negative no body POST /workshifts', () => {
     it('should return 400', async () => {
-      const response = await request.post('/workshifts');
+      const response = await request.post('/api/v1/workshifts');
       expect(response.status).toBe(400);
     });
   });
@@ -146,7 +147,7 @@ describe('WORKSHIFT ENDPOINTS TEST', () => {
       const newEndDate = new Date(newStartDate);
       newEndDate.setMinutes(newEndDate.getMinutes() + 240); // add duration (240 minutes)
 
-      const response = await request.put(`/workshifts/${sampleWorkshifts[0]._id}`)
+      const response = await request.put(`/api/v1/workshifts/${sampleWorkshifts[0]._id}`)
         .send({
           startDate: newStartDate,
           duration: 240,
@@ -176,7 +177,7 @@ describe('WORKSHIFT ENDPOINTS TEST', () => {
     nextWeek = nextWeek.toISOString().split('T')[0];
 
     it('should return 201 and create workshifts when provided with valid data', async () => {
-      const response = await request.post('/workshifts/week')
+      const response = await request.post('/api/v1/workshifts/week')
         .send({
           doctorId,
           clinicId,
@@ -195,7 +196,7 @@ describe('WORKSHIFT ENDPOINTS TEST', () => {
     });
 
     it('should return 400 if the periodEndDate is earlier than periodStartDate', async () => {
-      const response = await request.post('/workshifts/week')
+      const response = await request.post('/api/v1/workshifts/week')
         .send({
           doctorId,
           clinicId,
@@ -209,7 +210,7 @@ describe('WORKSHIFT ENDPOINTS TEST', () => {
     });
 
     it('should return 400 if the period spans different weeks', async () => {
-      const response = await request.post('/workshifts/week')
+      const response = await request.post('/api/v1/workshifts/week')
         .send({
           doctorId,
           clinicId,
@@ -223,7 +224,7 @@ describe('WORKSHIFT ENDPOINTS TEST', () => {
     });
 
     it('should return 400 if required fields are missing', async () => {
-      const response = await request.post('/workshifts/week')
+      const response = await request.post('/api/v1/workshifts/week')
         .send({
           doctorId,
           duration: 240,  // Missing clinicId and periodStartDate
@@ -236,20 +237,20 @@ describe('WORKSHIFT ENDPOINTS TEST', () => {
   });
   describe('test negative no body PUT /workshifts/:id', () => {
     it('should return 400', async () => {
-      const response = await request.put(`/workshifts/${sampleWorkshifts[0]._id}`);
+      const response = await request.put(`/api/v1/workshifts/${sampleWorkshifts[0]._id}`);
       expect(response.status).toBe(400);
     });
   });
   describe('test negative no id PUT /workshifts/:id', () => {
     it('should return 404', async () => {
-      const response = await request.put(`/workshifts/${uuidv4()}`);
+      const response = await request.put(`/api/v1/workshifts/${uuidv4()}`);
       expect(response.status).toBe(400);
     });
   });
   describe('test DELETE /workshifts/:id', () => {
     it('should return 204 and should delete a workshift', async () => {
       const previousWorkshifts = await Workshift.find();
-      const response = await request.delete(`/workshifts/${sampleWorkshifts[0]._id}`);
+      const response = await request.delete(`/api/v1/workshifts/${sampleWorkshifts[0]._id}`);
       const currentWorkshifts = await Workshift.find();
       expect(response.status).toBe(204);
       expect(currentWorkshifts.length).toBe(previousWorkshifts.length - 1);

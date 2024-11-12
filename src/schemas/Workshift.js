@@ -37,6 +37,7 @@ const WorkshiftSchema = new mongoose.Schema({
     type: Number, // In minutes
     required: true,
     default: 480, // 8 hours
+    min: [60, 'Duration must be at least 60 minutes'],
   }
 }, {
   timestamps: true
@@ -53,6 +54,12 @@ WorkshiftSchema.pre('findOneAndUpdate', function (next) {
     this._update.endDate = new Date(this._update.startDate);
     this._update.endDate.setMinutes(this._update.endDate.getMinutes() + this._update.duration);
   }
+  next();
+});
+
+WorkshiftSchema.pre('findByIdAndUpdate', function (next) {
+  this._update.endDate = new Date(this._update.startDate);
+  this._update.endDate.setMinutes(this._update.endDate.getMinutes() + this._update.duration);
   next();
 });
 
