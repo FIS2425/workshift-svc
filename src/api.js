@@ -19,7 +19,7 @@ export default function () {
     res.send('API funcionando correctamente');
   });
 
-  app.use('/workshifts', workshift);
+  app.use('/api/v1/workshifts', workshift);
 
   app.use('/docs', swaggerUI.serve, swaggerUI.setup(swaggerDocument));
 

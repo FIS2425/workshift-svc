@@ -24,6 +24,10 @@ export const createWorkshiftsBulk = async (req, res) => {
   try {
     const { doctorId, clinicId, duration, periodStartDate, periodEndDate } = req.body;
 
+    if (!doctorId || !clinicId || !periodStartDate || !periodEndDate) {
+      return res.status(400).json({ message: 'doctorId, clinicId, periodStartDate, and periodEndDate are required' });
+    }
+
     const startDate = new Date(periodStartDate);
     let endDate = new Date(periodEndDate);
 
@@ -88,6 +92,9 @@ export const getWorkshiftById = async (req, res) => {
 
 export const updateWorkshift = async (req, res) => {
   try {
+    if (!req.body.startDate || !req.body.duration) {
+      return res.status(400).json({ message: 'Start date and duration are required' });
+    }
     const workshift = await Workshift.findByIdAndUpdate(req.params.id, req.body, { new: true, runValidators: true });
     if (!workshift) {
       return res.status(404).json({ message: 'Workshift not found' });
@@ -155,6 +162,10 @@ export const getAvailability = async (req, res) => {
 export const getWorkshiftsByDoctorId = async (req, res) => {
   try {
     const workshifts = await Workshift.find({ doctorId: req.params.doctorId });
+    if (workshifts.length === 0) {
+      logger.error(`Workshifts not found for doctor ${req.params.doctorId}`);
+      return res.status(404).json({ message: 'Workshifts not found' });
+    }
     logger.debug(`Returning ${workshifts.length} workshifts`);
     res.status(200).json(workshifts);
   } catch (error) {
