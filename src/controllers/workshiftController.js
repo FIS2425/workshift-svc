@@ -43,7 +43,7 @@ export const createWorkshiftsBulk = async (req, res) => {
     const startWeek = await getWeek(startDate);
     const endWeek = await getWeek(endDate);
 
-    if (startWeek !== endWeek) {
+    if (startWeek !== endWeek && startDate.getFullYear() === endDate.getFullYear()) {
       return res.status(400).json({ message: 'The work period must be within the same week' });
     }
 
