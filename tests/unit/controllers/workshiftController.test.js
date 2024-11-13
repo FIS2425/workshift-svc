@@ -19,6 +19,9 @@ let thisWeeksMonday = new Date(today);
 thisWeeksMonday.setUTCDate(today.getUTCDate() + offsetToMonday);
 thisWeeksMonday.setUTCHours(0, 0, 0, 0);
 
+let thisWeeksFriday = new Date(thisWeeksMonday);
+thisWeeksFriday.setUTCDate(thisWeeksMonday.getUTCDate() + 4);
+
 const generateWorkshiftsForWeek = () => {
   const workshifts = [];
   const duration = 240;
@@ -64,7 +67,6 @@ describe('WORKSHIFT ENDPOINTS TEST', () => {
   describe('test GET /workshifts', () => {
     it('should return 200 and same number of elements as sample', async () => {
       const response = await request.get('/api/v1/workshifts');
-
       expect(response.status).toBe(200);
       expect(response.body.length).toBe(sampleWorkshifts.length);
     });
@@ -118,18 +120,27 @@ describe('WORKSHIFT ENDPOINTS TEST', () => {
     it('should return 201 and should add a workshift', async () => {
       const previousWorkshifts = await Workshift.find();
 
-      let todayAt8 = new Date(today);
-      todayAt8.setUTCHours(8, 0, 0, 0);
+      let nextWeek = new Date(today);
+      nextWeek.setUTCDate(today.getUTCDate() + 7);
+
+      console.log("hereee")
+      console.log(nextWeek.toISOString());
+      console.log(await Workshift.find(
+        {
+          doctorId: doctor1Id,
+        }
+      ));
 
       const newWorkshift = {
-        doctorId: uuidv4(),
+        doctorId: doctor1Id,
         clinicId: clinic1Id,
-        startDate: todayAt8.toISOString(),
+        startDate: nextWeek.toISOString(),
         duration: 240,
       };
 
       const response = await request.post('/api/v1/workshifts').send(newWorkshift);
       const currentWorkshifts = await Workshift.find();
+      console.log(response.body)
       expect(response.status).toBe(201);
       expect(currentWorkshifts.length).toBe(previousWorkshifts.length + 1);
     });
@@ -254,6 +265,120 @@ describe('WORKSHIFT ENDPOINTS TEST', () => {
       const currentWorkshifts = await Workshift.find();
       expect(response.status).toBe(204);
       expect(currentWorkshifts.length).toBe(previousWorkshifts.length - 1);
+    });
+  });
+});
+describe('WORKSHIFT BUSINESS LOGIC TEST', () => {
+  describe('test POST /workshifts with weekly hours limit', () => {
+    it('should return 400 if creating shifts exceeds the weekly hour limit for the doctor', async () => {
+      const doctorId = doctor2Id;
+      const clinicId = clinic2Id;
+
+      const thisWeeksSunday = new Date(today);
+      thisWeeksSunday.setUTCDate(today.getUTCDate() + 7);
+      thisWeeksSunday.setUTCHours(0, 0, 0, 0);
+
+      const newWorkshift = {
+        doctorId,
+        clinicId,
+        duration: 2880,
+        startDate: thisWeeksSunday,
+      };
+
+      const response = await request.post('/api/v1/workshifts').send(newWorkshift);
+
+      expect(response.status).toBe(400);
+      expect(response.body.message).toContain('cannot exceed 40 hours per week');
+    });
+  });
+  describe('test POST /workshifts/week with weekly hours limit', () => {
+    it('should return 400 if creating shifts exceeds the weekly hour limit for the doctor', async () => {
+      const doctorId = doctor1Id;
+      const clinicId = clinic1Id;
+
+      const newWorkshift = {
+        doctorId,
+        clinicId,
+        duration: 480,
+        periodStartDate: thisWeeksMonday,
+        periodEndDate: thisWeeksFriday,
+      };
+
+      const response = await request.post('/api/v1/workshifts/week').send(newWorkshift);
+
+      expect(response.status).toBe(400);
+      expect(response.body.message).toContain('cannot exceed 40 hours per week');
+    });
+  });
+  describe('test POST /workshifts with overlapping times', () => {
+    it('should return 400 if creating shifts overlaps with existing shifts', async () => {
+      const doctorId = uuidv4();
+      const clinicId = clinic1Id;
+
+      const overlappingShiftStart = new Date(today);
+      overlappingShiftStart.setUTCHours(8, 0, 0, 0);
+
+      await Workshift.create({
+        _id: uuidv4(),
+        doctorId,
+        clinicId,
+        startDate: overlappingShiftStart,
+        duration: 240,
+      });
+
+      console.log('workshift created')
+      console.log(Workshift.find(
+        {
+          doctorId,
+          clinicId,
+        }
+      )
+      );
+
+      const overlappingWorkshift = {
+        doctorId,
+        clinicId,
+        startDate: overlappingShiftStart,
+        duration: 240,
+      };
+
+      const response = await request.post('/api/v1/workshifts').send(overlappingWorkshift);
+
+      expect(response.status).toBe(400);
+      expect(response.body.message).toContain('Doctor already has a shift during this period');
+    });
+  });
+  describe('test POST /workshifts/week with overlapping times', () => {
+    it('should return 400 if creating shifts overlaps with existing shifts', async () => {
+      const doctorId = uuidv4();
+      const clinicId = clinic1Id;
+
+      const overlappingShiftStart = new Date(today);
+      overlappingShiftStart.setUTCHours(8, 0, 0, 0);
+
+      const todayPlus3 = new Date(today);
+      todayPlus3.setUTCDate(today.getUTCDate() + 3);
+
+      await Workshift.create({
+        _id: uuidv4(),
+        doctorId,
+        clinicId,
+        startDate: overlappingShiftStart,
+        duration: 240,
+      });
+
+      const overlappingWorkshift = {
+        doctorId,
+        clinicId,
+        duration: 240,
+        periodStartDate: overlappingShiftStart,
+        periodEndDate: todayPlus3,
+      };
+
+      const response = await request.post('/api/v1/workshifts/week').send(overlappingWorkshift);
+
+      expect(response.status).toBe(400);
+      expect(response.body.message).toContain('Doctor already has a shift during this period');
     });
   });
 });
