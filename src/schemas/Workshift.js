@@ -38,6 +38,7 @@ const WorkshiftSchema = new mongoose.Schema({
     required: true,
     default: 480, // 8 hours
     min: [60, 'Duration must be at least 60 minutes'],
+    max: [2400, 'Duration must be at most 2400 minutes']
   }
 }, {
   timestamps: true

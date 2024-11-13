@@ -1,10 +1,26 @@
 import Workshift from '../schemas/Workshift.js';
 import { getWeek } from '../utils/dateutils.js';
 import logger from '../config/logger.js';
+import { getDoctorWeeklyHours, checkForOverlappingShifts } from '../utils/validation.js';
 
 export const createWorkshift = async (req, res) => {
   try {
     const { doctorId, clinicId, startDate, duration } = req.body;
+
+    const overlapping = await checkForOverlappingShifts(doctorId, new Date(startDate), duration);
+    if (overlapping) {
+      return res.status(400).json({ message: 'Doctor already has a shift during this period' });
+    }
+
+    const totalHours = await getDoctorWeeklyHours(doctorId, new Date(startDate));
+    const newShiftHours = duration / 60;
+
+    if (totalHours + newShiftHours > 40) {
+      return res.status(400).json({
+        message: `Doctor ${doctorId} cannot exceed 40 hours per week. Current hours: ${totalHours}`
+      });
+    }
+
     const workshift = new Workshift({
       doctorId,
       clinicId,
@@ -43,21 +59,35 @@ export const createWorkshiftsBulk = async (req, res) => {
     const startWeek = await getWeek(startDate);
     const endWeek = await getWeek(endDate);
 
-    if (startWeek !== endWeek && startDate.getFullYear() === endDate.getFullYear()) {
+    if (startWeek !== endWeek) {
       return res.status(400).json({ message: 'The work period must be within the same week' });
     }
 
     const workshifts = [];
+    let weeklyHours = await getDoctorWeeklyHours(doctorId, startDate);
+
     for (let d = new Date(startDate); d <= endDate; d.setDate(d.getDate() + 1)) {
+      const overlapping = await checkForOverlappingShifts(doctorId, new Date(startDate), duration);
+      if (overlapping) {
+        console.log("hola!")
+        return res.status(400).json({ message: 'Doctor already has a shift during this period' });
+      }
+
+      if (weeklyHours + duration / 60 > 40) {
+        return res.status(400).json({
+          message: `Doctor ${doctorId} cannot exceed 40 hours per week. Current hours: ${weeklyHours}`
+        });
+      }
+
       workshifts.push(new Workshift({
         doctorId,
         clinicId,
         startDate: new Date(d),
         duration
       }));
-    }
 
-    // todo: validate bussiness rules
+      weeklyHours += duration / 60;
+    }
 
     await Workshift.insertMany(workshifts);
     logger.info(`Created ${workshifts.length} workshifts for doctor ${doctorId} at clinic ${clinicId}`);
@@ -165,8 +195,7 @@ export const getWorkshiftsByDoctorId = async (req, res) => {
     if (workshifts.length === 0) {
       logger.error(`Workshifts not found for doctor ${req.params.doctorId}`);
       return res.status(404).json({ message: 'Workshifts not found' });
-    }
-    logger.debug(`Returning ${workshifts.length} workshifts`);
+    }    logger.debug(`Returning ${workshifts.length} workshifts`);
     res.status(200).json(workshifts);
   } catch (error) {
     res.status(500).json({ message: error.message });
