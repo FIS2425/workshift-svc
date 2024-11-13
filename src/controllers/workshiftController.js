@@ -2,6 +2,16 @@ import Workshift from '../schemas/Workshift.js';
 import { getWeek } from '../utils/dateutils.js';
 import logger from '../config/logger.js';
 import { getDoctorWeeklyHours, checkForOverlappingShifts } from '../utils/validation.js';
+import { connectRabbitMQ } from '../config/rabbitmq.js';
+
+let channel;
+let exchangeName;
+if (process.env.NODE_ENV !== 'test') {
+  channel = await connectRabbitMQ();
+  exchangeName = 'workshiftExchange';
+  channel.assertExchange(exchangeName, 'fanout', { durable: false });
+}
+
 
 export const createWorkshift = async (req, res) => {
   try {
@@ -30,6 +40,16 @@ export const createWorkshift = async (req, res) => {
     );
     await workshift.save();
     logger.info(`Workshift ${workshift._id} created`);
+
+    // Publish message to RabbitMQ
+    if (process.env.NODE_ENV !== 'test') {
+      const msg = {
+        event: 'workshift-created',
+        workshift: workshift
+      };
+      channel.publish(exchangeName, '', Buffer.from(JSON.stringify(msg)));
+    }
+
     res.status(201).json(workshift);
   } catch (error) {
     res.status(400).json({ message: error.message });
@@ -90,6 +110,16 @@ export const createWorkshiftsBulk = async (req, res) => {
     }
 
     await Workshift.insertMany(workshifts);
+
+    // Publish message to RabbitMQ
+    if (process.env.NODE_ENV !== 'test') {
+      const msg = {
+        event: 'workshifts-many',
+        workshifts: workshifts
+      };
+      channel.publish(exchangeName, '', Buffer.from(JSON.stringify(msg)));
+    }
+
     logger.info(`Created ${workshifts.length} workshifts for doctor ${doctorId} at clinic ${clinicId}`);
     res.status(201).json(workshifts);
   } catch (error) {
@@ -129,6 +159,16 @@ export const updateWorkshift = async (req, res) => {
     if (!workshift) {
       return res.status(404).json({ message: 'Workshift not found' });
     }
+
+    // Publish message to RabbitMQ
+    if (process.env.NODE_ENV !== 'test') {
+      const msg = {
+        event: 'workshift-updated',
+        workshift: workshift
+      };
+      channel.publish(exchangeName, '', Buffer.from(JSON.stringify(msg)));
+    }
+
     logger.info(`Workshift ${workshift._id} updated`);
     res.status(200).json(workshift);
   } catch (error) {
@@ -142,48 +182,18 @@ export const deleteWorkshift = async (req, res) => {
     if (!workshift) {
       return res.status(404).json({ message: 'Workshift not found' });
     }
+
+    // Publish message to RabbitMQ
+    if (process.env.NODE_ENV !== 'test') {
+      const msg = {
+        event: 'workshift-deleted',
+        workshift: workshift
+      };
+      channel.publish(exchangeName, '', Buffer.from(JSON.stringify(msg)));
+    }
+
     logger.info(`Workshift ${workshift._id} deleted`);
     res.status(204).send();
-  } catch (error) {
-    res.status(500).json({ message: error.message });
-  }
-};
-
-export const getAvailability = async (req, res) => {
-  const { clinicId, date } = req.query;
-  try {
-    logger.debug(`Checking availability for clinic ${clinicId} at ${date}`);
-    const startDate = new Date(date);
-    const endDate = new Date(startDate);
-    endDate.setMinutes(endDate.getMinutes() + 30);// Suponiendo que la duración es de 30 minutos
-
-    const workshifts = await Workshift.find({
-      clinicId,
-      startDate: {
-        $gte: startDate,
-        $lt: endDate,
-      },
-    });
-
-    //TODO: Cache de apointments
-
-
-
-    //TODO: Comprobar la especialidad del doctor además de la disponibilidad
-
-    //TODO: Comprobar si el doctor tiene una cita en ese horario
-
-    if (workshifts.length === 1) {
-      logger.debug(`Workshift available for clinic ${clinicId} at ${date}`);
-      return res.status(200).json({ available: true, doctorId: workshifts[0].doctorId });
-    } else if(workshifts.length > 1){
-      logger.debug(`Workshift available for clinic ${clinicId} at ${date}`);
-      const doctorIds = workshifts.map(workshift => workshift.doctorId);
-      return res.status(200).json({ available: true, doctorIds: doctorIds });
-    } else {
-      logger.debug(`Workshift not available for clinic ${clinicId} at ${date}`);
-      return res.status(200).json({ available: false });
-    }
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
