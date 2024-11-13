@@ -69,7 +69,7 @@ export const createWorkshiftsBulk = async (req, res) => {
     for (let d = new Date(startDate); d <= endDate; d.setDate(d.getDate() + 1)) {
       const overlapping = await checkForOverlappingShifts(doctorId, new Date(startDate), duration);
       if (overlapping) {
-        console.log("hola!")
+        console.log('hola!')
         return res.status(400).json({ message: 'Doctor already has a shift during this period' });
       }
 
