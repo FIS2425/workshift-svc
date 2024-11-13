@@ -15,32 +15,31 @@ export async function getDoctorWeeklyHours(doctorId, date) {
 
 export async function checkForOverlappingShifts(doctorId, newShiftStartDate, duration) {
   const start = new Date(newShiftStartDate);
-    const end = new Date(start);
-    end.setMinutes(start.getMinutes() + duration);
+  const end = new Date(start);
+  end.setMinutes(start.getMinutes() + duration);
 
-    const query = {
-      doctorId: doctorId,
-      $or: [
-        {
-          // New workshift starts within an existing workshift
-          startDate: { $lte: start },
-          endDate: { $gt: start }
-        },
-        {
-          // New workshift ends within an existing workshift
-          startDate: { $lt: end },
-          endDate: { $gte: end }
-        },
-        {
-          // New workshift fully covers an existing workshift
-          startDate: { $gte: start },
-          endDate: { $lte: end }
-        }
-      ]
-    };
+  const query = {
+    doctorId: doctorId,
+    $or: [
+      {
+        // New workshift starts within an existing workshift
+        startDate: { $lte: start },
+        endDate: { $gt: start }
+      },
+      {
+        // New workshift ends within an existing workshift
+        startDate: { $lt: end },
+        endDate: { $gte: end }
+      },
+      {
+        // New workshift fully covers an existing workshift
+        startDate: { $gte: start },
+        endDate: { $lte: end }
+      }
+    ]
+  };
 
-    const overlappingWorkshifts = await Workshift.find(query);
-    console.log("overlappingWorkshifts: ", overlappingWorkshifts);
+  const overlappingWorkshifts = await Workshift.find(query);
 
-    return overlappingWorkshifts.length !== 0; // Return true if no overlap
+  return overlappingWorkshifts.length !== 0; // Return true if no overlap
 }
