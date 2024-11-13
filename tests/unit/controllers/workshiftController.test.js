@@ -123,14 +123,6 @@ describe('WORKSHIFT ENDPOINTS TEST', () => {
       let nextWeek = new Date(today);
       nextWeek.setUTCDate(today.getUTCDate() + 7);
 
-      console.log("hereee")
-      console.log(nextWeek.toISOString());
-      console.log(await Workshift.find(
-        {
-          doctorId: doctor1Id,
-        }
-      ));
-
       const newWorkshift = {
         doctorId: doctor1Id,
         clinicId: clinic1Id,
@@ -140,7 +132,7 @@ describe('WORKSHIFT ENDPOINTS TEST', () => {
 
       const response = await request.post('/api/v1/workshifts').send(newWorkshift);
       const currentWorkshifts = await Workshift.find();
-      console.log(response.body)
+
       expect(response.status).toBe(201);
       expect(currentWorkshifts.length).toBe(previousWorkshifts.length + 1);
     });
@@ -325,15 +317,6 @@ describe('WORKSHIFT BUSINESS LOGIC TEST', () => {
         startDate: overlappingShiftStart,
         duration: 240,
       });
-
-      console.log('workshift created')
-      console.log(Workshift.find(
-        {
-          doctorId,
-          clinicId,
-        }
-      )
-      );
 
       const overlappingWorkshift = {
         doctorId,
