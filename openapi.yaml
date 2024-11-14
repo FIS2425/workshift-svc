@@ -18,6 +18,8 @@ paths:
     get:
       tags:
         - Workshifts
+      security:
+        - cookieAuth: []
       summary: Get all workshifts
       responses:
         '200':
@@ -34,6 +36,8 @@ paths:
     post:
       tags:
         - Workshifts
+      security:
+        - cookieAuth: []
       summary: Create a new workshift
       requestBody:
         required: true
@@ -55,6 +59,8 @@ paths:
     post:
       tags:
         - Workshifts
+      security:
+        - cookieAuth: []
       summary: Create a new workshift for a week
       requestBody:
               required: true
@@ -111,6 +117,8 @@ paths:
     get:
       tags:
         - Workshifts
+      security:
+        - cookieAuth: []
       summary: Get a workshift by ID
       parameters:
         - name: id
@@ -134,6 +142,8 @@ paths:
     put:
       tags:
         - Workshifts
+      security:
+        - cookieAuth: []
       summary: Update a workshift by ID
       parameters:
         - name: id
@@ -163,6 +173,8 @@ paths:
     delete:
       tags:
         - Workshifts
+      security:
+        - cookieAuth: []
       summary: Delete a workshift by ID
       parameters:
         - name: id
@@ -183,6 +195,8 @@ paths:
     get:
       tags:
         - Workshifts
+      security:
+        - cookieAuth: []
       summary: Get workshifts by doctor ID
       parameters:
         - name: doctorId
@@ -241,3 +255,8 @@ components:
         duration:
           type: integer
           example: 30
+  securitySchemes:
+    cookieAuth:
+        type: apiKey
+        in: cookie
+        name: token
