@@ -7,14 +7,14 @@ const PORT = process.env.PORT || 3001;
 mongoose
   .connect(MONGO_URI)
   .then(() => {
-    console.log('Conexión con MongoDB OK');
+    console.log('[Info] MongoDB connected');
 
     const app = api();
 
     app.listen(PORT, () => {
-      console.log(`Servidor escuchando en http://localhost:${PORT}`);
+      console.log(`[Info] Server running on http://localhost:${PORT}/docs`);
     });
   })
   .catch((error) => {
-    console.error('Error de conexión con MongoDB:', error.message);
+    console.error('[Error] MongoDB Conexion error:', error.message);
   });
