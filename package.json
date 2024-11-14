@@ -46,10 +46,13 @@
     "vitest": "2.1.4"
   },
   "dependencies": {
+    "amqplib": "0.10.4",
     "cookie-parser": "1.4.7",
+    "body-parser": "1.20.3",
     "cors": "2.8.5",
     "date-fns": "4.1.0",
     "express": "4.21.1",
+    "rabbitmq-client": "5.0.0",
     "mongoose": "8.8.1",
     "swagger-ui-express": "5.0.1",
     "uuid": "11.0.3",

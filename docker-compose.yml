@@ -9,11 +9,11 @@ services:
       - MONGO_INITDB_ROOT_USERNAME=${MONGOADMIN}
       - MONGO_INITDB_ROOT_PASSWORD=${MONGOPASS}
     networks:
-      - backend
+      - backend-workshift
     ports:
-      - "27017:27017"
+      - "27018:27017"
     volumes:
-      - mongo-data:/data/db
+      - mongo-data-workshift:/data/db
 
   workshift-svc:
     restart: unless-stopped
@@ -27,31 +27,18 @@ services:
     depends_on:
       - mongodb-workshift
     networks:
-      - backend
+      - backend-workshift
+      - rabbit-network
     ports:
       - "3011:3011"
     volumes:
       - .:/workshift-svc
 
-  appointment-svc:
-    restart: unless-stopped
-    image: cloudmedix/appointment
-    container_name: appointment-svc
-    environment:
-      - MONGODB_URL=${MONGOURL_APPOINTMENT}
-      - PORT=3012
-    depends_on:
-      - mongodb-workshift
-    networks:
-      - backend
-    ports:
-      - "3012:3012"
-    volumes:
-      - .env:/appointment-svc/.env
-
 volumes:
-  mongo-data:
+  mongo-data-workshift:
 
 networks:
-  backend:
+  backend-workshift:
     driver: bridge
+  rabbit-network:
+    external: true

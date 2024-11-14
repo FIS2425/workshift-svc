@@ -203,38 +203,6 @@ paths:
         '500':
           description: Error del servidor
 
-  /workshifts/availability:
-    get:
-      tags:
-        - Workshifts
-      summary: Check workshift availability
-      parameters:
-        - name: clinicId
-          in: query
-          required: true
-          description: Clinic ID
-          schema:
-            type: string
-        - name: date
-          in: query
-          required: true
-          description: Date to check availability
-          schema:
-            type: string
-            format: date-time
-      responses:
-        '200':
-          description: Workshift availability
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  available:
-                    type: boolean
-        '500':
-          description: Server error
-
 components:
   schemas:
     Workshift:

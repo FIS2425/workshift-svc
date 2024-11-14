@@ -11,7 +11,6 @@ Workshift management for a personnel administration application. This microservi
 | --- | --- | --- |
 | GET | [/workshifts](#getworkshifts) | Get all workshifts |
 | POST | [/workshifts](#postworkshifts) | Create a new workshift |
-| GET | [/workshifts/availability](#getworkshiftsavailability) | Check workshift availability |
 | GET | [/workshifts/doctor/{doctorId}](#getworkshiftsdoctordoctorid) | Get workshifts by doctor ID |
 | POST | [/workshifts/week](#postworkshiftsweek) | Create a new workshift for a week |
 | DELETE | [/workshifts/{id}](#deleteworkshiftsid) | Delete a workshift by ID |
@@ -89,37 +88,6 @@ Create a new workshift
 ```
 
 - 400 Validation error
-
-***
-
-### [GET]/workshifts/availability
-
-- Summary  
-Check workshift availability
-
-#### Parameters(Query)
-
-```ts
-clinicId: string
-```
-
-```ts
-date: string
-```
-
-#### Responses
-
-- 200 Workshift availability
-
-`application/json`
-
-```ts
-{
-  available?: boolean
-}
-```
-
-- 500 Server error
 
 ***
 
