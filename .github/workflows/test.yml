@@ -4,6 +4,10 @@ on:
   pull_request:
     branches:
       - main
+      - develop
+
+env:
+  VITE_JWT_SECRET: ${{ secrets.VITE_JWT_SECRET }}
 
 jobs:
   test:
