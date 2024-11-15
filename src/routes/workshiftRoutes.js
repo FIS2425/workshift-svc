@@ -8,9 +8,11 @@ import {
   updateWorkshift,
   deleteWorkshift
 } from '../controllers/workshiftController.js';
+import { verifyAuth } from '../middleware/verifyAuth.js';
 
 const router = express.Router();
 
+router.use(verifyAuth);
 router.get('/', getAllWorkshifts);
 router.post('/', createWorkshift);
 router.post('/week', createWorkshiftsBulk);
