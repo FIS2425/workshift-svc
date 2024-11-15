@@ -12,9 +12,7 @@ import { verifyAuth } from '../middleware/verifyAuth.js';
 
 const router = express.Router();
 
-if (process.env.NODE_ENV !== 'test') {
-  router.use(verifyAuth);
-}
+router.use(verifyAuth);
 router.get('/', getAllWorkshifts);
 router.post('/', createWorkshift);
 router.post('/week', createWorkshiftsBulk);
