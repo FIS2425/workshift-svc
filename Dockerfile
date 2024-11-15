@@ -4,7 +4,7 @@ WORKDIR /workshift-svc
 
 COPY . .
 
-RUN npm ci --production && \
+RUN npm ci --omit=dev && \
     rm -rf $(npm get cache)
 
 ENTRYPOINT ["npm", "start"]
