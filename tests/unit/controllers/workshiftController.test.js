@@ -1,12 +1,12 @@
-import { beforeAll, afterAll, describe, expect, it } from 'vitest';
+import { beforeAll, afterAll, describe, expect, it, beforeEach } from 'vitest';
 import Workshift from '../../../src/schemas/Workshift.js';
 import { v4 as uuidv4 } from 'uuid';
 import * as db from '../../setup/database';
 import { request } from '../../setup/setup';
+import jwt from 'jsonwebtoken';
 
 let clinic1Id = uuidv4();
 let clinic2Id = uuidv4();
-
 let doctor1Id = uuidv4();
 let doctor2Id = uuidv4();
 let doctor3Id = uuidv4();
@@ -52,6 +52,13 @@ const generateWorkshiftsForWeek = () => {
   return workshifts;
 };
 
+const sampleUser = {
+  _id: uuidv4(),
+  email: 'testuser2@mail.com',
+  password: 'pAssw0rd!',
+  roles: ['doctor'],
+};
+
 const sampleWorkshifts = generateWorkshiftsForWeek()
 
 beforeAll(async () => {
@@ -63,17 +70,25 @@ afterAll(async () => {
   await db.clearDatabase();
 });
 
+beforeEach(async () => {
+  const token = jwt.sign(
+    { userId: sampleUser._id, roles: sampleUser.roles },
+    process.env.VITE_JWT_SECRET
+  );
+  request.set('Cookie', `token=${token}`);
+});
+
 describe('WORKSHIFT ENDPOINTS TEST', () => {
   describe('test GET /workshifts', () => {
     it('should return 200 and same number of elements as sample', async () => {
-      const response = await request.get('/api/v1/workshifts');
+      const response = await request.get('/workshifts');
       expect(response.status).toBe(200);
       expect(response.body.length).toBe(sampleWorkshifts.length);
     });
   });
   describe('test GET /workshifts/:id', () => {
     it('should return 200 and the correct workshift', async () => {
-      const response = await request.get(`/api/v1/workshifts/${sampleWorkshifts[0]._id}`);
+      const response = await request.get(`/workshifts/${sampleWorkshifts[0]._id}`);
 
       const expectedWorkshift = {
         ...sampleWorkshifts[0].toObject(), // Convert to a plain JS object if it's a Mongoose document
@@ -89,7 +104,7 @@ describe('WORKSHIFT ENDPOINTS TEST', () => {
   });
   describe('test GET /workshifts/doctor/:doctorId', () => {
     it('should return 200 and the correct workshifts', async () => {
-      const response = await request.get(`/api/v1/workshifts/doctor/${doctor1Id}`);
+      const response = await request.get(`/workshifts/doctor/${doctor1Id}`);
 
       const expectedWorkshifts = sampleWorkshifts.filter(workshift => workshift.doctorId === doctor1Id)
         .map(workshift => ({
@@ -106,13 +121,13 @@ describe('WORKSHIFT ENDPOINTS TEST', () => {
   });
   describe('test negative no id GET /workshifts/doctor/:doctorId', () => {
     it('should return 404', async () => {
-      const response = await request.get(`/api/v1/workshifts/doctor/${uuidv4()}`);
+      const response = await request.get(`/workshifts/doctor/${uuidv4()}`);
       expect(response.status).toBe(404);
     })
   });
   describe('test negative no id GET /workshifts/:id', () => {
     it('should return 404', async () => {
-      const response = await request.get(`/api/v1/workshifts/${uuidv4()}`);
+      const response = await request.get(`/workshifts/${uuidv4()}`);
       expect(response.status).toBe(404);
     });
   });
@@ -120,17 +135,17 @@ describe('WORKSHIFT ENDPOINTS TEST', () => {
     it('should return 201 and should add a workshift', async () => {
       const previousWorkshifts = await Workshift.find();
 
-      let nextWeek = new Date(today);
-      nextWeek.setUTCDate(today.getUTCDate() + 7);
+      let testDateNextWeek = new Date(today);
+      testDateNextWeek.setUTCDate(today.getUTCDate() + 7);
 
       const newWorkshift = {
         doctorId: doctor1Id,
         clinicId: clinic1Id,
-        startDate: nextWeek.toISOString(),
+        startDate: testDateNextWeek.toISOString(),
         duration: 240,
       };
 
-      const response = await request.post('/api/v1/workshifts').send(newWorkshift);
+      const response = await request.post('/workshifts').send(newWorkshift);
       const currentWorkshifts = await Workshift.find();
 
       expect(response.status).toBe(201);
@@ -139,7 +154,7 @@ describe('WORKSHIFT ENDPOINTS TEST', () => {
   });
   describe('test negative no body POST /workshifts', () => {
     it('should return 400', async () => {
-      const response = await request.post('/api/v1/workshifts');
+      const response = await request.post('/workshifts');
       expect(response.status).toBe(400);
     });
   });
@@ -150,7 +165,7 @@ describe('WORKSHIFT ENDPOINTS TEST', () => {
       const newEndDate = new Date(newStartDate);
       newEndDate.setMinutes(newEndDate.getMinutes() + 240); // add duration (240 minutes)
 
-      const response = await request.put(`/api/v1/workshifts/${sampleWorkshifts[0]._id}`)
+      const response = await request.put(`/workshifts/${sampleWorkshifts[0]._id}`)
         .send({
           startDate: newStartDate,
           duration: 240,
@@ -168,25 +183,28 @@ describe('WORKSHIFT ENDPOINTS TEST', () => {
     let doctorId = uuidv4();
     let clinicId = uuidv4();
 
-    let todayAt8 = new Date(today);
-    todayAt8.setUTCHours(8, 0, 0, 0);
+    let testDate = new Date();
+    testDate.setFullYear(2025);
+    testDate.setMonth(9);
+    testDate.setDate(20);
+    testDate.setUTCHours(8, 0, 0, 0);
 
-    let todayPlus3 = new Date(today);
-    todayPlus3.setDate(todayPlus3.getDate() + 3);
-    todayPlus3 = todayPlus3.toISOString().split('T')[0];
+    let testDatePlus3 = new Date(testDate);
+    testDatePlus3.setUTCDate(testDatePlus3.getUTCDate() + 3);
+    testDatePlus3 = testDatePlus3.toISOString().split('T')[0];
 
-    let nextWeek = new Date(today);
-    nextWeek.setUTCDate(today.getUTCDate() + 8);
-    nextWeek = nextWeek.toISOString().split('T')[0];
+    let testDateNextWeek = new Date(testDate);
+    testDateNextWeek.setUTCDate(testDate.getUTCDate() + 8);
+    testDateNextWeek = testDateNextWeek.toISOString().split('T')[0];
 
     it('should return 201 and create workshifts when provided with valid data', async () => {
-      const response = await request.post('/api/v1/workshifts/week')
+      const response = await request.post('/workshifts/week')
         .send({
           doctorId,
           clinicId,
           duration: 240,
-          periodStartDate: todayAt8,
-          periodEndDate: todayPlus3,
+          periodStartDate: testDate,
+          periodEndDate: testDatePlus3,
         });
 
       expect(response.status).toBe(201);
@@ -199,13 +217,13 @@ describe('WORKSHIFT ENDPOINTS TEST', () => {
     });
 
     it('should return 400 if the periodEndDate is earlier than periodStartDate', async () => {
-      const response = await request.post('/api/v1/workshifts/week')
+      const response = await request.post('/workshifts/week')
         .send({
           doctorId,
           clinicId,
           duration: 240,
-          periodStartDate: todayPlus3,
-          periodEndDate: todayAt8,
+          periodStartDate: testDatePlus3,
+          periodEndDate: testDate,
         });
 
       expect(response.status).toBe(400);
@@ -213,13 +231,13 @@ describe('WORKSHIFT ENDPOINTS TEST', () => {
     });
 
     it('should return 400 if the period spans different weeks', async () => {
-      const response = await request.post('/api/v1/workshifts/week')
+      const response = await request.post('/workshifts/week')
         .send({
           doctorId,
           clinicId,
           duration: 240,
-          periodStartDate: todayAt8,
-          periodEndDate: nextWeek,
+          periodStartDate: testDate,
+          periodEndDate: testDateNextWeek,
         });
 
       expect(response.status).toBe(400);
@@ -227,11 +245,11 @@ describe('WORKSHIFT ENDPOINTS TEST', () => {
     });
 
     it('should return 400 if required fields are missing', async () => {
-      const response = await request.post('/api/v1/workshifts/week')
+      const response = await request.post('/workshifts/week')
         .send({
           doctorId,
           duration: 240,  // Missing clinicId and periodStartDate
-          periodEndDate: todayPlus3,
+          periodEndDate: testDatePlus3,
         });
 
       expect(response.status).toBe(400);
@@ -240,20 +258,20 @@ describe('WORKSHIFT ENDPOINTS TEST', () => {
   });
   describe('test negative no body PUT /workshifts/:id', () => {
     it('should return 400', async () => {
-      const response = await request.put(`/api/v1/workshifts/${sampleWorkshifts[0]._id}`);
+      const response = await request.put(`/workshifts/${sampleWorkshifts[0]._id}`);
       expect(response.status).toBe(400);
     });
   });
   describe('test negative no id PUT /workshifts/:id', () => {
     it('should return 404', async () => {
-      const response = await request.put(`/api/v1/workshifts/${uuidv4()}`);
+      const response = await request.put(`/workshifts/${uuidv4()}`);
       expect(response.status).toBe(400);
     });
   });
   describe('test DELETE /workshifts/:id', () => {
     it('should return 204 and should delete a workshift', async () => {
       const previousWorkshifts = await Workshift.find();
-      const response = await request.delete(`/api/v1/workshifts/${sampleWorkshifts[0]._id}`);
+      const response = await request.delete(`/workshifts/${sampleWorkshifts[0]._id}`);
       const currentWorkshifts = await Workshift.find();
       expect(response.status).toBe(204);
       expect(currentWorkshifts.length).toBe(previousWorkshifts.length - 1);
@@ -277,7 +295,7 @@ describe('WORKSHIFT BUSINESS LOGIC TEST', () => {
         startDate: thisWeeksSunday,
       };
 
-      const response = await request.post('/api/v1/workshifts').send(newWorkshift);
+      const response = await request.post('/workshifts').send(newWorkshift);
 
       expect(response.status).toBe(400);
       expect(response.body.message).toContain('cannot exceed 40 hours per week');
@@ -296,7 +314,7 @@ describe('WORKSHIFT BUSINESS LOGIC TEST', () => {
         periodEndDate: thisWeeksFriday,
       };
 
-      const response = await request.post('/api/v1/workshifts/week').send(newWorkshift);
+      const response = await request.post('/workshifts/week').send(newWorkshift);
 
       expect(response.status).toBe(400);
       expect(response.body.message).toContain('cannot exceed 40 hours per week');
@@ -325,7 +343,7 @@ describe('WORKSHIFT BUSINESS LOGIC TEST', () => {
         duration: 240,
       };
 
-      const response = await request.post('/api/v1/workshifts').send(overlappingWorkshift);
+      const response = await request.post('/workshifts').send(overlappingWorkshift);
 
       expect(response.status).toBe(400);
       expect(response.body.message).toContain('Doctor already has a shift during this period');
@@ -335,12 +353,17 @@ describe('WORKSHIFT BUSINESS LOGIC TEST', () => {
     it('should return 400 if creating shifts overlaps with existing shifts', async () => {
       const doctorId = uuidv4();
       const clinicId = clinic1Id;
+      let testDate = new Date();
+      testDate.setFullYear(2025);
+      testDate.setMonth(9);
+      testDate.setDate(20);
+      testDate.setUTCHours(8, 0, 0, 0);
 
-      const overlappingShiftStart = new Date(today);
+      const overlappingShiftStart = new Date(testDate);
       overlappingShiftStart.setUTCHours(8, 0, 0, 0);
 
-      const todayPlus3 = new Date(today);
-      todayPlus3.setUTCDate(today.getUTCDate() + 3);
+      const testDatePlus3 = new Date(testDate);
+      testDatePlus3.setUTCDate(testDate.getUTCDate() + 3);
 
       await Workshift.create({
         _id: uuidv4(),
@@ -355,10 +378,10 @@ describe('WORKSHIFT BUSINESS LOGIC TEST', () => {
         clinicId,
         duration: 240,
         periodStartDate: overlappingShiftStart,
-        periodEndDate: todayPlus3,
+        periodEndDate: testDatePlus3,
       };
 
-      const response = await request.post('/api/v1/workshifts/week').send(overlappingWorkshift);
+      const response = await request.post('/workshifts/week').send(overlappingWorkshift);
 
       expect(response.status).toBe(400);
       expect(response.body.message).toContain('Doctor already has a shift during this period');
