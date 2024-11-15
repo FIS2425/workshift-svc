@@ -12,7 +12,7 @@ let request;
 beforeAll(async () => {
   await db.connect();
   server = app.listen(0);
-  request = supertest(server);
+  request = supertest.agent(server);
 });
 
 afterAll(async () => {
