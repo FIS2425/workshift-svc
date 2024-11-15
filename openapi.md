@@ -23,6 +23,7 @@ Workshift management for a personnel administration application. This microservi
 | --- | --- | --- |
 | Workshift | [#/components/schemas/Workshift](#componentsschemasworkshift) |  |
 | WorkshiftInput | [#/components/schemas/WorkshiftInput](#componentsschemasworkshiftinput) |  |
+| cookieAuth | [#/components/securitySchemes/cookieAuth](#componentssecurityschemescookieauth) |  |
 
 ## Path Details
 
@@ -32,6 +33,9 @@ Workshift management for a personnel administration application. This microservi
 
 - Summary  
 Get all workshifts
+
+- Security  
+cookieAuth  
 
 #### Responses
 
@@ -57,6 +61,9 @@ Get all workshifts
 
 - Summary  
 Create a new workshift
+
+- Security  
+cookieAuth  
 
 #### RequestBody
 
@@ -96,6 +103,9 @@ Create a new workshift
 - Summary  
 Get workshifts by doctor ID
 
+- Security  
+cookieAuth  
+
 #### Responses
 
 - 200 Lista de workshifts
@@ -120,6 +130,9 @@ Get workshifts by doctor ID
 
 - Summary  
 Create a new workshift for a week
+
+- Security  
+cookieAuth  
 
 #### RequestBody
 
@@ -174,6 +187,9 @@ Create a new workshift for a week
 - Summary  
 Delete a workshift by ID
 
+- Security  
+cookieAuth  
+
 #### Responses
 
 - 204 Workshift deleted
@@ -188,6 +204,9 @@ Delete a workshift by ID
 
 - Summary  
 Get a workshift by ID
+
+- Security  
+cookieAuth  
 
 #### Responses
 
@@ -215,6 +234,9 @@ Get a workshift by ID
 
 - Summary  
 Update a workshift by ID
+
+- Security  
+cookieAuth  
 
 #### RequestBody
 
@@ -271,5 +293,15 @@ Update a workshift by ID
   clinicId?: string
   startDate?: string
   duration?: integer
+}
+```
+
+### #/components/securitySchemes/cookieAuth
+
+```ts
+{
+  "type": "apiKey",
+  "in": "cookie",
+  "name": "token"
 }
 ```
