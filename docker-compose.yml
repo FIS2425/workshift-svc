@@ -1,8 +1,8 @@
 services:
-  mongodb-workshift:
+  mongodb:
     restart: unless-stopped
     image: mongo:latest
-    container_name: mongodb
+    container_name: mongodb-workshift
     environment:
       - MONGO_INITDB_ROOT_USERNAME=${MONGOADMIN}
       - MONGO_INITDB_ROOT_PASSWORD=${MONGOPASS}
@@ -23,7 +23,7 @@ services:
       - MONGODB_URL=${MONGOURL}
       - PORT=3011
     depends_on:
-      - mongodb-workshift
+      - mongodb
     networks:
       - backend-workshift
       - rabbit-network
