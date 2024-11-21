@@ -1,4 +1,5 @@
 import winston from 'winston';
+import KafkaTransport from '../utils/kafkaTransport.js';
 
 const levels = {
   error: 0,
@@ -44,7 +45,8 @@ const logger = winston.createLogger({
 });
 
 if (process.env.NODE_ENV === 'development') {
-  logger.add(new winston.transports.File({ filename: './logs/developmentLog.txt', level: 'debug',
+  logger.add(new winston.transports.File({
+    filename: './logs/developmentLog.txt', level: 'debug',
   }));
 } else if (process.env.NODE_ENV !== 'production') {
   logger.add(new winston.transports.Console({
@@ -53,6 +55,13 @@ if (process.env.NODE_ENV === 'development') {
       winston.format.simple()
     ),
   }));
+} else if (process.env.NODE_ENV === 'production') {
+  logger.add(
+    new KafkaTransport({
+      kafkaHost: process.env.KAFKA_HOST,
+      topic: 'microservice-logs',
+    }),
+  );
 }
 
 // ___________________Examples_____________________
