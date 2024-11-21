@@ -19,6 +19,13 @@ export const createWorkshift = async (req, res) => {
 
     const overlapping = await checkForOverlappingShifts(doctorId, new Date(startDate), duration);
     if (overlapping) {
+      logger.error('Error creating workshift: Doctor already has a shift during this period', {
+        method: req.method,
+        url: req.originalUrl,
+        body: req.body,
+        ip: req.headers['x-forwarded-for'] || req.ip,
+      });
+
       return res.status(400).json({ message: 'Doctor already has a shift during this period' });
     }
 
@@ -26,6 +33,13 @@ export const createWorkshift = async (req, res) => {
     const newShiftHours = duration / 60;
 
     if (totalHours + newShiftHours > 40) {
+      logger.warn('Error creating workshift: Doctor cannot exceed 40 hours per week', {
+        method: req.method,
+        url: req.originalUrl,
+        body: req.body,
+        ip: req.headers['x-forwarded-for'] || req.ip,
+      });
+
       return res.status(400).json({
         message: `Doctor ${doctorId} cannot exceed 40 hours per week. Current hours: ${totalHours}`
       });
@@ -39,7 +53,12 @@ export const createWorkshift = async (req, res) => {
     }
     );
     await workshift.save();
-    logger.info(`Workshift ${workshift._id} created`);
+    logger.info('Received request to create workshift', {
+      method: req.method,
+      url: req.originalUrl,
+      body: req.body,
+      ip: req.headers['x-forwarded-for'] || req.ip,
+    });
 
     // Publish message to RabbitMQ
     if (process.env.NODE_ENV !== 'test') {
@@ -52,6 +71,13 @@ export const createWorkshift = async (req, res) => {
 
     res.status(201).json(workshift);
   } catch (error) {
+    logger.error('Error creating workshift', {
+      method: req.method,
+      url: req.originalUrl,
+      body: req.body,
+      ip: req.headers['x-forwarded-for'] || req.ip,
+      error: error.message,
+    });
     res.status(400).json({ message: error.message });
   }
 };
@@ -61,6 +87,13 @@ export const createWorkshiftsBulk = async (req, res) => {
     const { doctorId, clinicId, duration, periodStartDate, periodEndDate } = req.body;
 
     if (!doctorId || !clinicId || !periodStartDate || !periodEndDate) {
+      logger.error('Error creating workshifts: doctorId, clinicId, periodStartDate, and periodEndDate are required', {
+        method: req.method,
+        url: req.originalUrl,
+        body: req.body,
+        ip: req.headers['x-forwarded-for'] || req.ip,
+      });
+
       return res.status(400).json({ message: 'doctorId, clinicId, periodStartDate, and periodEndDate are required' });
     }
 
@@ -73,6 +106,13 @@ export const createWorkshiftsBulk = async (req, res) => {
     endDate.setMilliseconds(startDate.getMilliseconds());
 
     if (endDate < startDate && endDate.getDate() !== startDate.getDate()) {
+      logger.error('Error creating workshifts: The work period must be at least one day long', {
+        method: req.method,
+        url: req.originalUrl,
+        body: req.body,
+        ip: req.headers['x-forwarded-for'] || req.ip,
+      });
+
       return res.status(400).json({ message: 'The work period must be at least one day long' });
     }
 
@@ -80,6 +120,13 @@ export const createWorkshiftsBulk = async (req, res) => {
     const endWeek = await getWeek(endDate);
 
     if (startWeek !== endWeek) {
+      logger.error('Error creating workshifts: The work period must be within the same week', {
+        method: req.method,
+        url: req.originalUrl,
+        body: req.body,
+        ip: req.headers['x-forwarded-for'] || req.ip,
+      });
+
       return res.status(400).json({ message: 'The work period must be within the same week' });
     }
 
@@ -89,11 +136,23 @@ export const createWorkshiftsBulk = async (req, res) => {
     for (let d = new Date(startDate); d <= endDate; d.setDate(d.getDate() + 1)) {
       const overlapping = await checkForOverlappingShifts(doctorId, new Date(startDate), duration);
       if (overlapping) {
-        console.log('hola!')
+        logger.error('Error creating workshifts: Doctor already has a shift during this period', {
+          method: req.method,
+          url: req.originalUrl,
+          body: req.body,
+          ip: req.headers['x-forwarded-for'] || req.ip,
+        });
+
         return res.status(400).json({ message: 'Doctor already has a shift during this period' });
       }
 
       if (weeklyHours + duration / 60 > 40) {
+        logger.error('Error creating workshifts: Doctor cannot exceed 40 hours per week', {
+          method: req.method,
+          url: req.originalUrl,
+          body: req.body,
+          ip: req.headers['x-forwarded-for'] || req.ip,
+        });
         return res.status(400).json({
           message: `Doctor ${doctorId} cannot exceed 40 hours per week. Current hours: ${weeklyHours}`
         });
@@ -120,9 +179,23 @@ export const createWorkshiftsBulk = async (req, res) => {
       channel.publish(exchangeName, '', Buffer.from(JSON.stringify(msg)));
     }
 
-    logger.info(`Created ${workshifts.length} workshifts for doctor ${doctorId} at clinic ${clinicId}`);
+    logger.info( `Created ${workshifts.length} workshifts for doctor ${doctorId} at clinic ${clinicId}`, {
+      method: req.method,
+      url: req.originalUrl,
+      body: req.body,
+      ip: req.headers['x-forwarded-for'] || req.ip,
+    });
+
     res.status(201).json(workshifts);
   } catch (error) {
+    logger.error('Error creating workshifts', {
+      method: req.method,
+      url: req.originalUrl,
+      body: req.body,
+      ip: req.headers['x-forwarded-for'] || req.ip,
+      error: error.message,
+    });
+
     res.status(400).json({ message: error.message });
   }
 };
@@ -130,9 +203,16 @@ export const createWorkshiftsBulk = async (req, res) => {
 export const getAllWorkshifts = async (req, res) => {
   try {
     const workshifts = await Workshift.find();
-    logger.debug(`Returning ${workshifts.length} workshifts`);
     res.status(200).json(workshifts);
   } catch (error) {
+    logger.error('Error getting all workshifts', {
+      method: req.method,
+      url: req.originalUrl,
+      body: req.body,
+      ip: req.headers['x-forwarded-for'] || req.ip,
+      error: error.message,
+    });
+
     res.status(500).json({ message: error.message });
   }
 };
@@ -141,11 +221,24 @@ export const getWorkshiftById = async (req, res) => {
   try {
     const workshift = await Workshift.findById(req.params.id);
     if (!workshift) {
+      logger.error(`Workshift ${req.params.id} not found`, {
+        method: req.method,
+        url: req.originalUrl,
+        body: req.body,
+        ip: req.headers['x-forwarded-for'] || req.ip,
+      });
+
       return res.status(404).json({ message: 'Workshift not found' });
     }
-    logger.debug(`Returning workshift ${workshift._id}`);
     res.status(200).json(workshift);
   } catch (error) {
+    logger.error('Error getting workshift by id', {
+      method: req.method,
+      url: req.originalUrl,
+      body: req.body,
+      ip: req.headers['x-forwarded-for'] || req.ip,
+      error: error.message,
+    });
     res.status(500).json({ message: error.message });
   }
 };
@@ -153,10 +246,24 @@ export const getWorkshiftById = async (req, res) => {
 export const updateWorkshift = async (req, res) => {
   try {
     if (!req.body.startDate || !req.body.duration) {
+      logger.error('Error updating workshift: Start date and duration are required', {
+        method: req.method,
+        url: req.originalUrl,
+        body: req.body,
+        ip: req.headers['x-forwarded-for'] || req.ip,
+      });
+
       return res.status(400).json({ message: 'Start date and duration are required' });
     }
     const workshift = await Workshift.findByIdAndUpdate(req.params.id, req.body, { new: true, runValidators: true });
     if (!workshift) {
+      logger.error(`Workshift ${req.params.id} not found`, {
+        method: req.method,
+        url: req.originalUrl,
+        body: req.body,
+        ip: req.headers['x-forwarded-for'] || req.ip,
+      });
+
       return res.status(404).json({ message: 'Workshift not found' });
     }
 
@@ -169,9 +276,23 @@ export const updateWorkshift = async (req, res) => {
       channel.publish(exchangeName, '', Buffer.from(JSON.stringify(msg)));
     }
 
-    logger.info(`Workshift ${workshift._id} updated`);
+    logger.info(`Workshift ${workshift._id} updated`, {
+      method: req.method,
+      url: req.originalUrl,
+      body: req.body,
+      ip: req.headers['x-forwarded-for'] || req.ip,
+    });
+
     res.status(200).json(workshift);
   } catch (error) {
+    logger.error('Error updating workshift', {
+      method: req.method,
+      url: req.originalUrl,
+      body: req.body,
+      ip: req.headers['x-forwarded-for'] || req.ip,
+      error: error.message,
+    });
+
     res.status(400).json({ message: error.message });
   }
 };
@@ -180,6 +301,13 @@ export const deleteWorkshift = async (req, res) => {
   try {
     const workshift = await Workshift.findByIdAndDelete(req.params.id);
     if (!workshift) {
+      logger.error(`Workshift ${req.params.id} not found`, {
+        method: req.method,
+        url: req.originalUrl,
+        body: req.body,
+        ip: req.headers['x-forwarded-for'] || req.ip,
+      });
+
       return res.status(404).json({ message: 'Workshift not found' });
     }
 
@@ -192,9 +320,23 @@ export const deleteWorkshift = async (req, res) => {
       channel.publish(exchangeName, '', Buffer.from(JSON.stringify(msg)));
     }
 
-    logger.info(`Workshift ${workshift._id} deleted`);
+    logger.info(`Workshift ${workshift._id} deleted`, {
+      method: req.method,
+      url: req.originalUrl,
+      body: req.body,
+      ip: req.headers['x-forwarded-for'] || req.ip,
+    });
+
     res.status(204).send();
   } catch (error) {
+    logger.error('Error deleting workshift', {
+      method: req.method,
+      url: req.originalUrl,
+      body: req.body,
+      ip: req.headers['x-forwarded-for'] || req.ip,
+      error: error.message,
+    });
+
     res.status(500).json({ message: error.message });
   }
 };
@@ -203,11 +345,25 @@ export const getWorkshiftsByDoctorId = async (req, res) => {
   try {
     const workshifts = await Workshift.find({ doctorId: req.params.doctorId });
     if (workshifts.length === 0) {
-      logger.error(`Workshifts not found for doctor ${req.params.doctorId}`);
+      logger.error(`Workshifts not found for doctor ${req.params.doctorId}`, {
+        method: req.method,
+        url: req.originalUrl,
+        body: req.body,
+        ip: req.headers['x-forwarded-for'] || req.ip,
+      });
+
       return res.status(404).json({ message: 'Workshifts not found' });
-    }    logger.debug(`Returning ${workshifts.length} workshifts`);
+    }
     res.status(200).json(workshifts);
   } catch (error) {
+    logger.error('Error getting workshifts by doctor id', {
+      method: req.method,
+      url: req.originalUrl,
+      body: req.body,
+      ip: req.headers['x-forwarded-for'] || req.ip,
+      error: error.message,
+    });
+
     res.status(500).json({ message: error.message });
   }
 };
