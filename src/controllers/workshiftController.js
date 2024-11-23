@@ -22,7 +22,7 @@ export const createWorkshift = async (req, res) => {
       logger.error('Error creating workshift: Doctor already has a shift during this period', {
         method: req.method,
         url: req.originalUrl,
-        ip: req.headers['x-forwarded-for'] || req.ip,
+        ip: req.headers && req.headers['x-forwarded-for'] || req.ip,
         requestId: req.headers && req.headers['x-request-id'] || null,
       });
 
@@ -36,7 +36,7 @@ export const createWorkshift = async (req, res) => {
       logger.warn('Error creating workshift: Doctor cannot exceed 40 hours per week', {
         method: req.method,
         url: req.originalUrl,
-        ip: req.headers['x-forwarded-for'] || req.ip,
+        ip: req.headers && req.headers['x-forwarded-for'] || req.ip,
         requestId: req.headers && req.headers['x-request-id'] || null,
       });
 
@@ -57,7 +57,7 @@ export const createWorkshift = async (req, res) => {
       method: req.method,
       url: req.originalUrl,
       body: req.body,
-      ip: req.headers['x-forwarded-for'] || req.ip,
+      ip: req.headers && req.headers['x-forwarded-for'] || req.ip,
       requestId: req.headers && req.headers['x-request-id'] || null,
     });
 
@@ -76,7 +76,7 @@ export const createWorkshift = async (req, res) => {
       method: req.method,
       url: req.originalUrl,
       body: req.body,
-      ip: req.headers['x-forwarded-for'] || req.ip,
+      ip: req.headers && req.headers['x-forwarded-for'] || req.ip,
       requestId: req.headers && req.headers['x-request-id'] || null,
       error: error.message,
     });
@@ -92,7 +92,7 @@ export const createWorkshiftsBulk = async (req, res) => {
       logger.error('Error creating workshifts: doctorId, clinicId, periodStartDate, and periodEndDate are required', {
         method: req.method,
         url: req.originalUrl,
-        ip: req.headers['x-forwarded-for'] || req.ip,
+        ip: req.headers && req.headers['x-forwarded-for'] || req.ip,
         requestId: req.headers && req.headers['x-request-id'] || null,
       });
 
@@ -111,7 +111,7 @@ export const createWorkshiftsBulk = async (req, res) => {
       logger.error('Error creating workshifts: The work period must be at least one day long', {
         method: req.method,
         url: req.originalUrl,
-        ip: req.headers['x-forwarded-for'] || req.ip,
+        ip: req.headers && req.headers['x-forwarded-for'] || req.ip,
         requestId: req.headers && req.headers['x-request-id'] || null,
       });
 
@@ -125,7 +125,7 @@ export const createWorkshiftsBulk = async (req, res) => {
       logger.error('Error creating workshifts: The work period must be within the same week', {
         method: req.method,
         url: req.originalUrl,
-        ip: req.headers['x-forwarded-for'] || req.ip,
+        ip: req.headers && req.headers['x-forwarded-for'] || req.ip,
         requestId: req.headers && req.headers['x-request-id'] || null,
       });
 
@@ -141,7 +141,7 @@ export const createWorkshiftsBulk = async (req, res) => {
         logger.error('Error creating workshifts: Doctor already has a shift during this period', {
           method: req.method,
           url: req.originalUrl,
-          ip: req.headers['x-forwarded-for'] || req.ip,
+          ip: req.headers && req.headers['x-forwarded-for'] || req.ip,
           requestId: req.headers && req.headers['x-request-id'] || null,
         });
 
@@ -152,7 +152,7 @@ export const createWorkshiftsBulk = async (req, res) => {
         logger.error('Error creating workshifts: Doctor cannot exceed 40 hours per week', {
           method: req.method,
           url: req.originalUrl,
-          ip: req.headers['x-forwarded-for'] || req.ip,
+          ip: req.headers && req.headers['x-forwarded-for'] || req.ip,
           requestId: req.headers && req.headers['x-request-id'] || null,
         });
         return res.status(400).json({
@@ -185,7 +185,7 @@ export const createWorkshiftsBulk = async (req, res) => {
       method: req.method,
       url: req.originalUrl,
       body: req.body,
-      ip: req.headers['x-forwarded-for'] || req.ip,
+      ip: req.headers && req.headers['x-forwarded-for'] || req.ip,
       requestId: req.headers && req.headers['x-request-id'] || null,
     });
 
@@ -195,7 +195,7 @@ export const createWorkshiftsBulk = async (req, res) => {
       method: req.method,
       url: req.originalUrl,
       body: req.body,
-      ip: req.headers['x-forwarded-for'] || req.ip,
+      ip: req.headers && req.headers['x-forwarded-for'] || req.ip,
       requestId: req.headers && req.headers['x-request-id'] || null,
       error: error.message,
     });
@@ -213,7 +213,7 @@ export const getAllWorkshifts = async (req, res) => {
       method: req.method,
       url: req.originalUrl,
       body: req.body,
-      ip: req.headers['x-forwarded-for'] || req.ip,
+      ip: req.headers && req.headers['x-forwarded-for'] || req.ip,
       requestId: req.headers && req.headers['x-request-id'] || null,
       error: error.message,
     });
@@ -229,7 +229,7 @@ export const getWorkshiftById = async (req, res) => {
       logger.error(`Workshift ${req.params.id} not found`, {
         method: req.method,
         url: req.originalUrl,
-        ip: req.headers['x-forwarded-for'] || req.ip,
+        ip: req.headers && req.headers['x-forwarded-for'] || req.ip,
         requestId: req.headers && req.headers['x-request-id'] || null,
       });
 
@@ -241,7 +241,7 @@ export const getWorkshiftById = async (req, res) => {
       method: req.method,
       url: req.originalUrl,
       body: req.body,
-      ip: req.headers['x-forwarded-for'] || req.ip,
+      ip: req.headers && req.headers['x-forwarded-for'] || req.ip,
       requestId: req.headers && req.headers['x-request-id'] || null,
       error: error.message,
     });
@@ -255,7 +255,7 @@ export const updateWorkshift = async (req, res) => {
       logger.error('Error updating workshift: Start date and duration are required', {
         method: req.method,
         url: req.originalUrl,
-        ip: req.headers['x-forwarded-for'] || req.ip,
+        ip: req.headers && req.headers['x-forwarded-for'] || req.ip,
         requestId: req.headers && req.headers['x-request-id'] || null,
       });
 
@@ -266,7 +266,7 @@ export const updateWorkshift = async (req, res) => {
       logger.error(`Workshift ${req.params.id} not found`, {
         method: req.method,
         url: req.originalUrl,
-        ip: req.headers['x-forwarded-for'] || req.ip,
+        ip: req.headers && req.headers['x-forwarded-for'] || req.ip,
         requestId: req.headers && req.headers['x-request-id'] || null,
       });
 
@@ -286,7 +286,7 @@ export const updateWorkshift = async (req, res) => {
       method: req.method,
       url: req.originalUrl,
       body: req.body,
-      ip: req.headers['x-forwarded-for'] || req.ip,
+      ip: req.headers && req.headers['x-forwarded-for'] || req.ip,
       requestId: req.headers && req.headers['x-request-id'] || null,
     });
 
@@ -296,7 +296,7 @@ export const updateWorkshift = async (req, res) => {
       method: req.method,
       url: req.originalUrl,
       body: req.body,
-      ip: req.headers['x-forwarded-for'] || req.ip,
+      ip: req.headers && req.headers['x-forwarded-for'] || req.ip,
       requestId: req.headers && req.headers['x-request-id'] || null,
       error: error.message,
     });
@@ -312,7 +312,7 @@ export const deleteWorkshift = async (req, res) => {
       logger.error(`Workshift ${req.params.id} not found`, {
         method: req.method,
         url: req.originalUrl,
-        ip: req.headers['x-forwarded-for'] || req.ip,
+        ip: req.headers && req.headers['x-forwarded-for'] || req.ip,
         requestId: req.headers && req.headers['x-request-id'] || null,
       });
 
@@ -332,7 +332,7 @@ export const deleteWorkshift = async (req, res) => {
       method: req.method,
       url: req.originalUrl,
       body: req.body,
-      ip: req.headers['x-forwarded-for'] || req.ip,
+      ip: req.headers && req.headers['x-forwarded-for'] || req.ip,
       requestId: req.headers && req.headers['x-request-id'] || null,
     });
 
@@ -342,7 +342,7 @@ export const deleteWorkshift = async (req, res) => {
       method: req.method,
       url: req.originalUrl,
       body: req.body,
-      ip: req.headers['x-forwarded-for'] || req.ip,
+      ip: req.headers && req.headers['x-forwarded-for'] || req.ip,
       requestId: req.headers && req.headers['x-request-id'] || null,
       error: error.message,
     });
@@ -358,7 +358,7 @@ export const getWorkshiftsByDoctorId = async (req, res) => {
       logger.error(`Workshifts not found for doctor ${req.params.doctorId}`, {
         method: req.method,
         url: req.originalUrl,
-        ip: req.headers['x-forwarded-for'] || req.ip,
+        ip: req.headers && req.headers['x-forwarded-for'] || req.ip,
         requestId: req.headers && req.headers['x-request-id'] || null,
       });
 
@@ -370,7 +370,7 @@ export const getWorkshiftsByDoctorId = async (req, res) => {
       method: req.method,
       url: req.originalUrl,
       body: req.body,
-      ip: req.headers['x-forwarded-for'] || req.ip,
+      ip: req.headers && req.headers['x-forwarded-for'] || req.ip,
       requestId: req.headers && req.headers['x-request-id'] || null,
       error: error.message,
     });
