@@ -43,5 +43,6 @@
   },
   "assignees": ["alvarobernal2412"],
   "reviewers": ["adrrf"],
-  "extends": ["mergeConfidence:age-confidence-badges"]
+  "extends": ["mergeConfidence:age-confidence-badges"],
+  "baseBranches": ["develop"]
 }
