@@ -29,8 +29,6 @@ services:
       - rabbit-network
     ports:
       - "3011:3011"
-    volumes:
-      - .:/workshift-svc
 
 volumes:
   mongo-data-workshift:
