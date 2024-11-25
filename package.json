@@ -55,7 +55,7 @@
     "jsonwebtoken": "9.0.2",
     "mongoose": "8.8.2",
     "rabbitmq-client": "5.0.1",
-    "kafka-node": "5.0.0",
+    "kafkajs": "2.2.4",
     "swagger-ui-express": "5.0.1",
     "uuid": "11.0.3",
     "winston": "3.17.0",
