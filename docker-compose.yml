@@ -20,8 +20,19 @@ services:
       dockerfile: Dockerfile
     container_name: workshift-svc
     environment:
-      - MONGODB_URL=${MONGOURL}
       - PORT=3011
+      - MONGOADMIN=${MONGOADMIN}
+      - MONGOPASS=${MONGOPASS}
+      - MONGOURL=${MONGOURL}
+      - NODE_ENV=production
+      - RABBIT_USERNAME=${RABBIT_USERNAME}
+      - RABBIT_PASSWORD=${RABBIT_PASSWORD}
+      - RABBIT_HOST=${RABBIT_HOST}
+      - RABBIT_PORT=${RABBIT_PORT}
+      - RABBIT_VHOST=${RABBIT_VHOST}
+      - API_PREFIX=/api/v1
+      - JWT_SECRET=${JWT_SECRET}
+      - KAFKA_HOST=${KAFKA_HOST}
     depends_on:
       - mongodb
     networks:

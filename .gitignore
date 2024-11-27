@@ -19,3 +19,5 @@ seeders
 
 # Logs
 logs
+
+kubernetes/secrets.yaml

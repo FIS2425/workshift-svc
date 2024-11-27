@@ -11,7 +11,7 @@
   "type": "module",
   "main": "index.js",
   "scripts": {
-    "start": "node --env-file=.env ./src/config/index.js",
+    "start": "node ./src/config/index.js",
     "lint": "eslint . --max-warnings=0 --cache --cache-location node_modules/.cache/eslint",
     "lint-fix": "eslint . --fix --max-warnings=0 --cache --cache-location node_modules/.cache/eslint",
     "dev": "node --watch --env-file=.env ./src/config/index.js",
