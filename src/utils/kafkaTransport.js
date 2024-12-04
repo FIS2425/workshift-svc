@@ -14,7 +14,7 @@ class KafkaTransport extends winston.Transport {
     this.topic = opts.topic || 'logs';
   }
 
-  async log(info, callback) {
+  async log(info, _callback) {
     const message = {
       value: JSON.stringify({ ...info })
     };
@@ -26,9 +26,7 @@ class KafkaTransport extends winston.Transport {
       await this.producer.connect();
       await this.producer.send(payloads);
       await this.producer.disconnect();
-    } catch (error) {
-      callback(error, false);
-    }
+    } catch { }
   }
 };
 
