@@ -362,7 +362,7 @@ export const getWorkshiftsByDoctorId = async (req, res) => {
         requestId: req.headers && req.headers['x-request-id'] || null,
       });
 
-      return res.status(404).json({ message: 'Workshifts not found' });
+      return res.status(404).json({ message: 'Doctor not found' });
     }
     res.status(200).json(workshifts);
   } catch (error) {
