@@ -19,6 +19,10 @@ export default function () {
     res.send('API funcionando correctamente');
   });
 
+  app.get(`${process.env.API_PREFIX || ''}/health`, (req, res) => {
+    res.status(200).send('API is healthy');
+  });
+
   app.use(`${process.env.API_PREFIX || ''}/workshifts`, workshift);
 
   app.use('/docs', swaggerUI.serve, swaggerUI.setup(swaggerDocument));
