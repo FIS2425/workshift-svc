@@ -1,0 +1,23 @@
+name: Trigger Kubernetes Sync
+
+on:
+  push:
+    branches:
+      - develop
+    paths:
+      - 'kubernetes/*.yaml'
+
+jobs:
+  notify-gateway:
+    runs-on: ubuntu-latest
+    permissions:
+      actions: write
+    steps:
+      - name: Trigger API Gateway Sync 🚀
+        uses: convictional/trigger-workflow-and-wait@v1.6.5
+        with:
+          owner: FIS2425
+          repo: docs
+          github_token: ${{ secrets.DISPATCH_TOKEN }}
+          workflow_file_name: sync-kubernetes.yml
+          ref: main
