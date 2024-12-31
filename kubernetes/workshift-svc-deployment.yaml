@@ -75,6 +75,12 @@ spec:
                   key: KAFKA_HOST
           image: ghcr.io/fis2425/workshift:latest
           name: workshift
+          livenessProbe:
+            httpGet:
+              path: /api/v1/healthz
+              port: 3011
+            initialDelaySeconds: 20
+            periodSeconds: 5
           ports:
             - containerPort: 3011
               protocol: TCP

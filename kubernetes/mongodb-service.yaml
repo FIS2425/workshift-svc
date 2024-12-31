@@ -5,8 +5,8 @@ metadata:
     kompose.cmd: kompose convert -o kubernetes/
     kompose.version: 1.34.0 (HEAD)
   labels:
-    io.kompose.service: mongodb
-  name: mongodb
+    io.kompose.service: mongodb-workshift
+  name: mongodb-workshift
 spec:
   type: ClusterIP
   ports:
@@ -15,4 +15,4 @@ spec:
       port: 27017
       targetPort: 27017
   selector:
-    io.kompose.service: mongodb
+    io.kompose.service: mongodb-workshift
