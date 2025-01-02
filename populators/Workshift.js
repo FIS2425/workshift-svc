@@ -20,36 +20,36 @@ const workshiftsSample = [
     _id: uuidv4(),
     doctorId: uuidv4(),
     clinicId: uuidv4(),
-    startDate: new Date('2024-11-10T09:00:00Z'),
-    duration: 30
-  },
-  {
-    _id: uuidv4(),
-    doctorId: uuidv4(),
-    clinicId: uuidv4(),
-    startDate: new Date('2024-11-10T10:00:00Z'),
-    duration: 45
-  },
-  {
-    _id: uuidv4(),
-    doctorId: uuidv4(),
-    clinicId: uuidv4(),
-    startDate: new Date('2024-11-10T11:00:00Z'),
+    startDate: new Date('2025-01-10T09:00:00Z'),
     duration: 60
   },
   {
     _id: uuidv4(),
     doctorId: uuidv4(),
     clinicId: uuidv4(),
-    startDate: new Date('2024-11-10T13:00:00Z'),
-    duration: 30
+    startDate: new Date('2025-01-11T10:00:00Z'),
+    duration: 120
   },
   {
     _id: uuidv4(),
     doctorId: uuidv4(),
     clinicId: uuidv4(),
-    startDate: new Date('2024-11-10T14:00:00Z'),
+    startDate: new Date('2025-01-12T11:00:00Z'),
+    duration: 60
+  },
+  {
+    _id: uuidv4(),
+    doctorId: uuidv4(),
+    clinicId: uuidv4(),
+    startDate: new Date('2025-01-13T13:00:00Z'),
     duration: 90
+  },
+  {
+    _id: uuidv4(),
+    doctorId: uuidv4(),
+    clinicId: uuidv4(),
+    startDate: new Date('2025-01-14T14:00:00Z'),
+    duration: 120
   }
 ];
 
