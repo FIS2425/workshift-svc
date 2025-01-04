@@ -56,11 +56,10 @@ if (process.env.NODE_ENV === 'development') {
     ),
   }));
 } else if (process.env.NODE_ENV === 'production') {
-  logger.add(
-    new KafkaTransport({
-      kafkaHost: process.env.KAFKA_HOST,
-      topic: 'microservice-logs',
-    }),
+  logger.add(new KafkaTransport({
+    kafkaHost: process.env.KAFKA_HOST,
+    topic: 'microservice-logs',
+  })
   );
 }
 
