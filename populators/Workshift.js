@@ -15,41 +15,74 @@ const connectToDatabase = async () => {
     });
 };
 
+const today = new Date();
+const tomorrow = new Date(today.setDate(today.getDate() + 1));
+// const inTwoDays = new Date(today.setDate(today.getDate() + 2));
+const inThreeDays = new Date(today.setDate(today.getDate() + 3));
+const inFourDays = new Date(today.setDate(today.getDate() + 4));
+
+const doctor2 = {
+  id: '6a86e820-e108-4a71-8f10-57c3e0ccd0ac',
+  name: 'Alvaro',
+  surname: 'Flores',
+  specialty: 'cardiology',
+  dni: '10000004H',
+  userId: '27163ac7-4f4d-4669-a0c1-4b8538405475',
+  clinicId: '27163ac7-4f4d-4669-a0c1-4b8538405475'
+}
+
+const doctor3 = {
+  id: 'a1ac971e-7188-4eaa-859c-7b2249e3c46b',
+  name: 'Adrian',
+  surname: 'Bernal',
+  specialty: 'neurology',
+  dni: '20060493P',
+  userId: '679f55e3-a3cd-4a47-aebd-13038c1528a0',
+  clinicId: '5b431574-d2ab-41d3-b1dd-84b06f2bd1a0'
+}
+
 const workshiftsSample = [
   {
     _id: uuidv4(),
-    doctorId: uuidv4(),
-    clinicId: uuidv4(),
-    startDate: new Date('2025-01-10T09:00:00Z'),
-    duration: 60
-  },
-  {
-    _id: uuidv4(),
-    doctorId: uuidv4(),
-    clinicId: uuidv4(),
-    startDate: new Date('2025-01-11T10:00:00Z'),
+    doctorId: doctor3.id,
+    clinicId: doctor2.clinicId,
+    startDate: new Date(today.setHours(8, 0, 0, 0)),
     duration: 120
   },
   {
     _id: uuidv4(),
-    doctorId: uuidv4(),
-    clinicId: uuidv4(),
-    startDate: new Date('2025-01-12T11:00:00Z'),
-    duration: 60
-  },
-  {
-    _id: uuidv4(),
-    doctorId: uuidv4(),
-    clinicId: uuidv4(),
-    startDate: new Date('2025-01-13T13:00:00Z'),
-    duration: 90
-  },
-  {
-    _id: uuidv4(),
-    doctorId: uuidv4(),
-    clinicId: uuidv4(),
-    startDate: new Date('2025-01-14T14:00:00Z'),
+    doctorId: doctor2.id,
+    clinicId: doctor2.clinicId,
+    startDate: new Date(today.setHours(18, 0, 0, 0)),
     duration: 120
+  },
+  {
+    _id: uuidv4(),
+    doctorId: doctor3.id,
+    clinicId: doctor3.clinicId,
+    startDate: new Date(tomorrow.setHours(9, 0, 0, 0)),
+    duration: 240
+  },
+  {
+    _id: uuidv4(),
+    doctorId: doctor2.id,
+    clinicId: doctor2.clinicId,
+    startDate: new Date(inThreeDays.setHours(10, 0, 0, 0)),
+    duration: 240
+  },
+  {
+    _id: uuidv4(),
+    doctorId: doctor3.id,
+    clinicId: doctor3.clinicId,
+    startDate: new Date(inThreeDays.setHours(12, 0, 0, 0)),
+    duration: 120
+  },
+  {
+    _id: uuidv4(),
+    doctorId: doctor2.id,
+    clinicId: doctor2.clinicId,
+    startDate: new Date(inFourDays.setHours(13, 0, 0, 0)),
+    duration: 240
   }
 ];
 
