@@ -8,11 +8,10 @@ metadata:
     io.kompose.service: workshift
   name: workshift-svc
 spec:
-  type: LoadBalancer
+  type: ClusterIP
   ports:
     - protocol: TCP
       port: 3011
       targetPort: 3011
-      nodePort: 30011
   selector:
     io.kompose.service: workshift
