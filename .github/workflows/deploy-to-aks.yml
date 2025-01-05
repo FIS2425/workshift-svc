@@ -1,0 +1,50 @@
+name: Deploy to Kubernetes
+
+on:
+  workflow_dispatch:
+  workflow_run:
+    workflows:
+      - Build and Push Docker Image
+    types:
+      - completed
+    branches:
+      - main
+
+jobs:
+  deploy:
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up KUBECONFIG
+      uses: azure/k8s-set-context@v4
+      with:
+        kubeconfig: ${{ secrets.KUBECONFIG }}
+
+    - name: Load environment variables
+      run: |
+        echo "Loading environment variables..."
+        echo "${{ secrets.ENV_FILE }}" > .env
+
+    - name: Create or Update Kubernetes Secrets
+      run: |
+        echo "Applying secrets: ${{ secrets.SECRETS_NAME }}"
+        kubectl create secret generic ${{ secrets.SECRETS_NAME }} --from-env-file=.env --dry-run=client -o yaml | kubectl apply -f -
+    
+    - name: Apply manifests
+      run: |
+        echo "Apply manifests..."
+        kubectl apply -f kubernetes/
+    
+    - name: Restart specified deployments
+      run: |
+        echo "Restarting deployments: ${RESTART_DEPLOYMENTS}"
+        for deployment in ${RESTART_DEPLOYMENTS}; do
+          echo "-> Restarting $deployment..."
+          kubectl rollout restart deployment $deployment
+        done
+      env:
+        RESTART_DEPLOYMENTS: ${{ secrets.RESTART_DEPLOYMENTS }}
