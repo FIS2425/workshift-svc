@@ -6,7 +6,7 @@ metadata:
     kompose.version: 1.34.0 (HEAD)
   labels:
     io.kompose.service: workshift
-  name: workshift-svc
+  name: workshift
 spec:
   type: ClusterIP
   ports:
