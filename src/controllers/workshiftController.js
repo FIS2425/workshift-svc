@@ -2,14 +2,15 @@ import Workshift from '../schemas/Workshift.js';
 import { getWeek } from '../utils/dateutils.js';
 import logger from '../config/logger.js';
 import { getDoctorWeeklyHours, checkForOverlappingShifts } from '../utils/validation.js';
-import { connectRabbitMQ } from '../config/rabbitmq.js';
+import { connectRabbitMQ, publishWorkshiftSync, publishWorkshiftCreated, publishWorkshiftUpdated, publishWorkshiftDeleted, publishWorkshiftsMany } from '../config/rabbitmq.js';
+import mongoose from 'mongoose';
 
-let channel;
-let exchangeName;
+let channel = null;
 if (process.env.NODE_ENV !== 'test') {
-  channel = await connectRabbitMQ();
-  exchangeName = 'workshiftExchange';
-  channel.assertExchange(exchangeName, 'fanout', { durable: false });
+  mongoose.connection.once('open', async () => {
+    channel = await connectRabbitMQ();
+    publishWorkshiftSync(channel);
+  });
 }
 
 
@@ -62,12 +63,8 @@ export const createWorkshift = async (req, res) => {
     });
 
     // Publish message to RabbitMQ
-    if (process.env.NODE_ENV !== 'test') {
-      const msg = {
-        event: 'workshift-created',
-        workshift: workshift
-      };
-      channel.publish(exchangeName, '', Buffer.from(JSON.stringify(msg)));
+    if (process.env.NODE_ENV !== 'test' && channel) {
+      await publishWorkshiftCreated(workshift, channel);
     }
 
     res.status(201).json(workshift);
@@ -173,12 +170,8 @@ export const createWorkshiftsBulk = async (req, res) => {
     await Workshift.insertMany(workshifts);
 
     // Publish message to RabbitMQ
-    if (process.env.NODE_ENV !== 'test') {
-      const msg = {
-        event: 'workshifts-many',
-        workshifts: workshifts
-      };
-      channel.publish(exchangeName, '', Buffer.from(JSON.stringify(msg)));
+    if (process.env.NODE_ENV !== 'test' && channel) {
+      await publishWorkshiftsMany(workshifts, channel);
     }
 
     logger.info( `Created ${workshifts.length} workshifts for doctor ${doctorId} at clinic ${clinicId}`, {
@@ -274,12 +267,8 @@ export const updateWorkshift = async (req, res) => {
     }
 
     // Publish message to RabbitMQ
-    if (process.env.NODE_ENV !== 'test') {
-      const msg = {
-        event: 'workshift-updated',
-        workshift: workshift
-      };
-      channel.publish(exchangeName, '', Buffer.from(JSON.stringify(msg)));
+    if (process.env.NODE_ENV !== 'test' && channel) {
+      await publishWorkshiftUpdated(workshift, channel);
     }
 
     logger.info(`Workshift ${workshift._id} updated`, {
@@ -320,12 +309,8 @@ export const deleteWorkshift = async (req, res) => {
     }
 
     // Publish message to RabbitMQ
-    if (process.env.NODE_ENV !== 'test') {
-      const msg = {
-        event: 'workshift-deleted',
-        workshift: workshift
-      };
-      channel.publish(exchangeName, '', Buffer.from(JSON.stringify(msg)));
+    if (process.env.NODE_ENV !== 'test' && channel) {
+      await publishWorkshiftDeleted(workshift._id, channel);
     }
 
     logger.info(`Workshift ${workshift._id} deleted`, {
