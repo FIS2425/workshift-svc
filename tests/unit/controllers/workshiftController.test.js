@@ -21,6 +21,11 @@ let nextWeekWednesday = new Date();
 nextWeekWednesday.setDate(nextWeekWednesday.getDate() + (3 + 7 - nextWeekWednesday.getDay()) % 7);
 
 
+if(nextWeekMonday > nextWeekWednesday){
+  nextWeekWednesday.setDate(nextWeekWednesday.getDate() + 7);
+}
+
+
 describe('Workshift Controller Unit', () => {
   describe('GET /workshifts', () => {
     it('should return all workshifts', async () => {
